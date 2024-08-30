@@ -83,6 +83,7 @@ export const authOptions = {
   },
   pages: {
     signIn: "/loginsitter",
+    signIn: "/login",
     error: "/auth/error",
   },
   debug: process.env.NODE_ENV === "development",
