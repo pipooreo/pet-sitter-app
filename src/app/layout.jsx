@@ -11,7 +11,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`font-satoshi ${inter.className}`}>{children}</body>
+      <head>
+        <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
+      </head>
+      <body className={`font-satoshi bg-white ${inter.className}`}>
+        {children}
+      </body>
     </html>
   );
 }
