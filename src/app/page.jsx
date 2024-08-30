@@ -1,10 +1,18 @@
+import Activity from "@/components/home/Activity";
+import HomeFooter from "@/components/home/HomeFooter";
+import HomeHeader from "@/components/home/HomeHeader";
+import SearchBar from "@/components/home/SearchBar";
 import MainLayout from "@/components/layouts/MainLayout";
-import Image from "next/image";
 
 export default function Home() {
   return (
     <MainLayout>
-      <main>Home Page</main>
+      <main className="w-full h-full xs:w-xs">
+        <HomeHeader />
+        <SearchBar />
+        <Activity />
+        <HomeFooter />
+      </main>
     </MainLayout>
   );
 }
