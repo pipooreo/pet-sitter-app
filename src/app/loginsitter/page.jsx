@@ -123,7 +123,9 @@ function LoginSitterPage() {
                   />
                 </div>
                 <div></div>
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password" className="font-black text-body2">
+                  Password
+                </label>
                 <div className="relative">
                   <Field
                     type="password"

@@ -10,7 +10,7 @@ function Sitterpage() {
   };
   return (
     <div>
-      <button onClick={handleSignOut}>Log Out</button>{" "}
+      <button onClick={handleSignOut}>Log Out</button>
     </div>
   );
 }
