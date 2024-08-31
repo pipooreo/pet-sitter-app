@@ -63,7 +63,7 @@ function Navbar() {
               Become a Pet Sitter
             </Link>
             <Link
-              href="/register"
+              href="/login"
               className="lg:p-[16px_24px] p-[16px_20px] hover:text-gray-400 active:text-gray-600"
             >
               Login
