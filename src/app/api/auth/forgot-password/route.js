@@ -37,16 +37,6 @@ export async function POST(request) {
     const otpExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     // กำหนดข้อมูลอีเมลที่จะส่ง
-    // const mailOptions = {
-    //   from: process.env.GMAIL_USER,
-    //   to: email,
-    //   subject: 'Your OTP Code',
-    //   text: `Your OTP code is ${otp}. Use this code to reset your password.`,
-    //   html: `<p>Your OTP code is <strong>${otp}</strong>. Use this code to reset your password.</p>
-    //   <p>This code is valid for 15 minutes only.</p>
-    //   <p>Please click the following link to reset your password:
-    //   <a href="http://localhost:3000/password-reset">Reset Password</a></p>`
-    // };
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: email,

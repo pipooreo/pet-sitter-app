@@ -205,7 +205,6 @@ export default function RegisterPage() {
                         {passwordError}
                       </div>
                     </>
-                    // <p className="text-red mt-1 text-body3">{passwordError}</p>
                   )}
                 </div>
 
