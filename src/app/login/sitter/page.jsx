@@ -80,9 +80,9 @@ function LoginSitterPage() {
             onSubmit={handleSubmit}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="flex flex-col ">
+              <Form className="flex flex-col gap-[32px]">
                 <div>
-                  <label htmlFor="email" className="font-black text-body2">
+                  <label htmlFor="email" className="text-black text-body2 ">
                     Email
                   </label>
                   <div className="relative">
@@ -123,7 +123,7 @@ function LoginSitterPage() {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="password" className="font-black text-body2">
+                  <label htmlFor="password" className="text-black text-body2">
                     Password
                   </label>
                   <div className="relative">
@@ -164,20 +164,20 @@ function LoginSitterPage() {
                   />
                 </div>
 
-                <button className="text-orange-500 text-[16px] text-center font-bold mb-2">
+                <button className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px] text-center font-bold ">
                   Forget Password?
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-orange-500 text-white p-2 rounded"
+                  className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-white rounded-[99px] p-[12px_24px]"
                 >
                   Login
                 </button>
-                <p className="mt-2">
+                <p className="flex gap-[8px] justify-center items-center text-[#060D18] text-body1">
                   Don’t have Pet Sitter account?
                   <button
-                    className="text-orange-500"
+                    className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px]"
                     onClick={() => router.push("/register")}
                   >
                     Register
