@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { BeatLoader } from 'react-spinners';
 import validator from 'validator';
 
-export default function RegisterPage() {
+export default function RegisterPetSitterPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -81,7 +81,7 @@ export default function RegisterPage() {
     // เริ่มส่งคำร้อง
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/register', {
+      const response = await axios.post('/api/auth/register-pet-sitter', {
         email,
         phone,
         password
@@ -89,7 +89,7 @@ export default function RegisterPage() {
 
       toast.success(response.data.message);
 
-      router.push('/login');
+      router.push('/login/sitter');
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Registration failed';
       toast.error(errorMessage);
@@ -98,7 +98,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-
   return (
     <main className="w-screen min-h-screen md:h-screen bg-white flex justify-center items-center">
       {loading ? (
@@ -107,15 +106,11 @@ export default function RegisterPage() {
         </div>
       ) : (
         <div className="w-full max-w-[1440px] h-full max-h-[1024px] md:relative flex justify-center items-center overflow-hidden">
-          <div className="w-[239px] h-[350px] hidden md:block md:absolute md:top-[75px] md:right-0 bg-[url('/paw-yellow.png')] bg-contain bg-center bg-no-repeat"></div>
-          <div className="w-[144px] h-[144px] absolute top-[-57px] right-[-10px] md:hidden bg-[url('/paw-yellow.png')] bg-contain bg-center bg-no-repeat"></div>
-          <div className="w-[318px] h-[310px] hidden md:block md:absolute md:bottom-[-105px] md:left-[-80px] bg-[url('/star-green.png')] bg-contain bg-center bg-no-repeat rotate-[-15deg]"></div>
-          <div className="w-[166px] h-[88px] hidden md:block md:absolute md:bottom-[210px] md:left-0 bg-[url('/ellipse-blue.png')] bg-contain bg-center bg-no-repeat"></div>
           <section className="w-full max-w-[440px] p-3 my-6">
             <div className="text-center">
               <h1 className="text-head2 md:text-head1 text-black">Join Us!</h1>
               <p className="text-body1 md:text-head3 text-gray-400">
-                Find your perfect pet sitter with us
+                Become the best Pet Sitter with us
               </p>
             </div>
             <div className="mt-6 md:mt-20">
@@ -216,40 +211,11 @@ export default function RegisterPage() {
                 </button>
               </form>
               <div className="mt-6 flex flex-col gap-6">
-                <div className="flex items-center">
-                  <div className="flex-grow">
-                    <hr className="border-t-2 border-gray-200" />
-                  </div>
-                  <div className="px-4 text-body1 text-gray-400 whitespace-nowrap">
-                    Or Continue With
-                  </div>
-                  <div className="flex-grow">
-                    <hr className="border-t-2 border-gray-200" />
-                  </div>
-                </div>
-                <div className="flex space-x-4">
-                  <button className="flex items-center justify-center flex-grow w-full bg-gray-200 hover:bg-gray-100 active:bg-gray-300 text-gray-400 hover:text-black font-bold py-4 rounded-full">
-                    <img
-                      src="/facebook-logo.png"
-                      alt="facebook logo"
-                      className="w-5 h-5 mr-2"
-                    />
-                    Facebook
-                  </button>
-                  <button className="flex items-center justify-center flex-grow w-full bg-gray-200 hover:bg-gray-100 active:bg-gray-300 text-gray-400 hover:text-black font-bold py-4 rounded-full">
-                    <img
-                      src="/google-logo.png"
-                      alt="google logo"
-                      className="w-5 h-5 mr-2"
-                    />
-                    Gmail
-                  </button>
-                </div>
                 <div className="text-center text-black">
                   <p>
-                    Already have an account?
+                    Already have Pet Sitter account?
                     <a
-                      href="/login"
+                      href="/login/sitter"
                       className="text-orange-500 hover:text-orange-400 active:text-orange-600 pl-3 font-bold cursor-pointer"
                     >
                       Login
