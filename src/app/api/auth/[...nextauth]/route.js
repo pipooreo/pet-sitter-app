@@ -32,11 +32,9 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      console.log("Sign in callback:", { user, account });
       return true;
     },
     jwt: async ({ token, user }) => {
-      console.log("JWT callback:", { token, user });
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -44,7 +42,6 @@ export const authOptions = {
       return token;
     },
     session: async ({ session, token }) => {
-      console.log("Session callback:", { session, token });
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;

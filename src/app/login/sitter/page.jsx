@@ -66,10 +66,12 @@ function LoginSitterPage() {
         pauseOnHover
         theme="light"
       />
-      <div className="w-[440px] flex flex-col justify-between gap-[56px]">
+      <div className="sm:w-[440px] w-full p-0 sm:p-[60px_16px] flex flex-col justify-between sm:gap-[56px] gap-[40px]">
         <div className="flex flex-col justify-center items-center">
-          <h1 className="text-head1">Welcome Back!</h1>
-          <h3 className="text-head3 text-gray-400">
+          <h1 className="sm:text-head1 text-[36px] font-bold text-black">
+            Welcome Back!
+          </h1>
+          <h3 className="sm:text-head3 text-[18px] font-medium text-gray-400">
             Become the best Pet Sitter with us
           </h3>
         </div>

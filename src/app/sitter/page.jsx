@@ -7,7 +7,7 @@ function Sitterpage() {
   const { data: session } = useSession();
   console.log(session);
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
+    await signOut({ callbackUrl: "/login/sitter" });
   };
   return (
     <div>

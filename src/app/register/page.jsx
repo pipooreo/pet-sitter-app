@@ -1,7 +1,11 @@
 import React from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/dist/server/api-utils";
 
 function RegisterPage() {
+  // const { data: session } = useSession();
+  // if (session) redirect;
   return (
     <div>
       <h1>Register Page</h1>
