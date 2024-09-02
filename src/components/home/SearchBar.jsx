@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
+import { Checkbox, FormControlLabel } from "@mui/material";
 
 function SearchBar() {
   const petTypeList = ["Dog", "Cat", "Bird", "Rabbit"];
@@ -30,11 +31,25 @@ function SearchBar() {
           <div className="flex gap-4">
             {petTypeList.map((name, index) => {
               return (
-                <div className="flex gap-2" key={index}>
-                  <input
-                    className="rounded-[6px] w-[24px] h-[24px] checkbox [--chkfg:orange]"
-                    type="checkbox"
-                    name={name}
+                <div className="flex gap-2 items-center" key={index}>
+                  <Checkbox
+                    // checked={wheelchairAccess}
+                    // onChange={(event) =>
+                    //   handleCheckboxChange(event, "wheelchair")
+                    // }
+                    sx={{
+                      color: "#DCDFED",
+                      "&.Mui-checked": {
+                        color: "#FF7037",
+                      },
+                      borderRadius: "6px",
+                      backgroundColor: "#FFFFFF",
+                      width: "6px",
+                      height: "6px",
+                      "&:hover": {
+                        color: "#FFB899",
+                      },
+                    }}
                   />
                   <label
                     htmlFor=""
@@ -42,6 +57,8 @@ function SearchBar() {
                   >
                     {name}
                   </label>
+                  {/* }
+                  /> */}
                 </div>
               );
             })}
@@ -56,12 +73,18 @@ function SearchBar() {
                 return (
                   <div
                     className={`flex gap-1 items-center border rounded-md p-[4px_8px] cursor-pointer ${
-                      isActive ? "bg-gray-200" : ""
+                      isActive ? "border-orange-500" : ""
                     }`}
                     onClick={() => handleToggle(index)}
                     key={index}
                   >
-                    <p className="text-gray-400">{num}</p>
+                    <p
+                      className={` ${
+                        isActive ? "text-orange-500" : "text-gray-400"
+                      }`}
+                    >
+                      {num}
+                    </p>
                     {Array.from({ length: num }).map((_, index) => {
                       return (
                         <FaStar
