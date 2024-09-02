@@ -10,7 +10,7 @@ function Activity() {
           </h3>
 
           <div className="flex flex-col gap-10 py-[40px] md:flex-row md:justify-between items-center xl:w-[1064px] grow">
-            <div className="flex flex-col gap-6 py-4 lg:w-[454px] p-[40px_16px]">
+            <div className="flex flex-col gap-6 py-4 lg:w-[454px] p-[40px_0px] md:gap-[55px]">
               <div className="flex gap-3">
                 <img src="/star-blue.png" className="w-[24px] h-[24px]" />
                 <div className="flex flex-col gap-3">
@@ -56,14 +56,14 @@ function Activity() {
             {/* <div className="flex justify-center"> */}
             <img
               src="/cat-content.png"
-              className="md:w-[455px] md:h-[500px] w-[343px] h-[453px] "
+              className="lg:w-[455px] lg:h-[601px] w-[349px] h-[453px] "
             />
             {/* </div> */}
           </div>
         </div>
       </div>
       <div className="flex flex-col py-10 items-center justify-center">
-        <div className="flex flex-col gap-10 px-4 md:flex-row md:justify-between xl:w-[1440px]">
+        <div className="flex flex-col gap-10 px-4 md:flex-row md:justify-between xl:w-[1440px] lg:px-20">
           <div className="flex flex-col px-6 gap-[46px] items-center xl:w-[416px]">
             <img
               src="/connect.png"
