@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import axios from 'axios';
-import { useState } from 'react';
-import { BeatLoader } from 'react-spinners';
-import { toast } from 'react-toastify';
-import validator from 'validator';
+import axios from "axios";
+import { useState } from "react";
+import { BeatLoader } from "react-spinners";
+import { toast } from "react-toastify";
+import validator from "validator";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validateEmail = () => {
@@ -23,7 +23,7 @@ export default function ForgotPassword() {
       );
       return false;
     }
-    setEmailError('');
+    setEmailError("");
     return true;
   };
 
@@ -32,7 +32,7 @@ export default function ForgotPassword() {
 
     // ตรวจสอบการกรอกข้อมูลก่อนส่ง
     if (!email.trim()) {
-      toast.error('Please fill the information before submitting.');
+      toast.error("Please fill the information before submitting.");
       return;
     }
 
@@ -40,14 +40,14 @@ export default function ForgotPassword() {
     const isEmailValid = validateEmail();
 
     if (!isEmailValid) {
-      toast.error('Please correct the errors before submitting.');
+      toast.error("Please correct the errors before submitting.");
       return;
     }
 
     // เริ่มส่งคำร้อง
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/forgot-password', {
+      const response = await axios.post("/api/auth/forgot-password", {
         email
       });
       toast.success(response.data.message);
@@ -57,9 +57,9 @@ export default function ForgotPassword() {
           Click on the link and follow on-screen instructions.
         </span>
       );
-      setEmail('');
+      setEmail("");
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to send email';
+      const errorMessage = err.response?.data?.error || "Failed to send email";
       toast.error(errorMessage);
       console.log(errorMessage);
     } finally {
@@ -93,15 +93,14 @@ export default function ForgotPassword() {
                 id="email"
                 className={`bg-white w-full p-3 text-black border ${
                   emailError
-                    ? 'border-red placeholder-black'
-                    : 'border-gray-200 placeholder-gray-400'
+                    ? "border-red placeholder-black"
+                    : "border-gray-200 placeholder-gray-400"
                 } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                 type="email"
                 placeholder="email@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onBlur={validateEmail}
-                // autoComplete="off"
               />
               {emailError && (
                 <>
@@ -115,7 +114,7 @@ export default function ForgotPassword() {
             </div>
             {loading ? (
               <button className="p-4 bg-gray-200 rounded-full" disabled>
-                <BeatLoader size={15} color={'#FF7037'} margin={2} />
+                <BeatLoader size={15} color={"#FF7037"} margin={2} />
               </button>
             ) : (
               <button
