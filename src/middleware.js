@@ -49,6 +49,7 @@ export const config = {
   matcher: [
     "/api/auth/register",
     "/api/auth/login",
+    "/api/auth/register-pet-sitter",
     "/sitter/:path*",
     "/admin/:path*",
     "/login/:path*",

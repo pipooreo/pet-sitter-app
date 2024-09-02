@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import axios from "axios";
-import { useState } from "react";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
-import { BeatLoader } from "react-spinners";
-import validator from "validator";
+import axios from 'axios';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import { BeatLoader } from 'react-spinners';
+import validator from 'validator';
 
-export default function RegisterPage() {
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+export default function RegisterPetSitterPage() {
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const router = useRouter();
 
   const validateEmail = () => {
@@ -28,15 +28,15 @@ export default function RegisterPage() {
       );
       return false;
     }
-    setEmailError("");
+    setEmailError('');
     return true;
   };
 
   const validatePhone = () => {
     // ลบ ตัวอักษรที่ไม่ใช่ตัวเลข (เช่น ช่องว่าง, ขีดคั่น, วงเล็บ, และสัญลักษณ์อื่น ๆ) ออกจากสตริง phone และคืนค่าหมายเลขโทรศัพท์ที่มีเฉพาะตัวเลขเท่านั้น.
-    const normalizedPhone = phone.trim().replace(/\D/g, "");
+    const normalizedPhone = phone.trim().replace(/\D/g, '');
 
-    if (!validator.isMobilePhone(normalizedPhone, "th-TH") && phone) {
+    if (!validator.isMobilePhone(normalizedPhone, 'th-TH') && phone) {
       setPhoneError(
         <p>
           Please enter a valid Thai phone number.
@@ -46,16 +46,16 @@ export default function RegisterPage() {
       );
       return false;
     }
-    setPhoneError("");
+    setPhoneError('');
     return true;
   };
 
   const validatePassword = () => {
     if (password.length < 12 && password) {
-      setPasswordError("Password must be at least 12 characters long.");
+      setPasswordError('Password must be at least 12 characters long.');
       return false;
     }
-    setPasswordError("");
+    setPasswordError('');
     return true;
   };
 
@@ -64,7 +64,7 @@ export default function RegisterPage() {
 
     // ตรวจสอบการกรอกข้อมูลก่อนส่ง
     if (!email.trim() || !phone.trim() || !password.trim()) {
-      toast.error("Please fill the information before submitting.");
+      toast.error('Please fill the information before submitting.');
       return;
     }
 
@@ -74,48 +74,43 @@ export default function RegisterPage() {
     const isPasswordValid = validatePassword();
 
     if (!isEmailValid || !isPhoneValid || !isPasswordValid) {
-      toast.error("Please correct the errors before submitting.");
+      toast.error('Please correct the errors before submitting.');
       return;
     }
 
     // เริ่มส่งคำร้อง
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/register", {
+      const response = await axios.post('/api/auth/register-pet-sitter', {
         email,
         phone,
-        password,
+        password
       });
 
       toast.success(response.data.message);
 
-      router.push("/login");
+      router.push('/login/sitter');
     } catch (err) {
-      const errorMessage = err.response?.data?.error || "Registration failed";
+      const errorMessage = err.response?.data?.error || 'Registration failed';
       toast.error(errorMessage);
       console.log(errorMessage);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <main className="w-screen min-h-screen md:h-screen bg-white flex justify-center items-center">
       {loading ? (
         <div className="flex justify-center items-center">
-          <BeatLoader size={15} color={"#FF7037"} margin={2} />
+          <BeatLoader size={15} color={'#FF7037'} margin={2} />
         </div>
       ) : (
         <div className="w-full max-w-[1440px] h-full max-h-[1024px] md:relative flex justify-center items-center overflow-hidden">
-          <div className="w-[239px] h-[350px] hidden md:block md:absolute md:top-[75px] md:right-0 bg-[url('/paw-yellow.png')] bg-contain bg-center bg-no-repeat"></div>
-          <div className="w-[144px] h-[144px] absolute top-[-57px] right-[-10px] md:hidden bg-[url('/paw-yellow.png')] bg-contain bg-center bg-no-repeat"></div>
-          <div className="w-[318px] h-[310px] hidden md:block md:absolute md:bottom-[-105px] md:left-[-80px] bg-[url('/star-green.png')] bg-contain bg-center bg-no-repeat rotate-[-15deg]"></div>
-          <div className="w-[166px] h-[88px] hidden md:block md:absolute md:bottom-[210px] md:left-0 bg-[url('/ellipse-blue.png')] bg-contain bg-center bg-no-repeat"></div>
           <section className="w-full max-w-[440px] p-3 my-6">
             <div className="text-center">
               <h1 className="text-head2 md:text-head1 text-black">Join Us!</h1>
               <p className="text-body1 md:text-head3 text-gray-400">
-                Find your perfect pet sitter with us
+                Become the best Pet Sitter with us
               </p>
             </div>
             <div className="mt-6 md:mt-20">
@@ -128,8 +123,8 @@ export default function RegisterPage() {
                     id="email"
                     className={`bg-white w-full p-3 text-black border ${
                       emailError
-                        ? "border-red placeholder-black"
-                        : "border-gray-200 placeholder-gray-400"
+                        ? 'border-red placeholder-black'
+                        : 'border-gray-200 placeholder-gray-400'
                     } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                     type="email"
                     placeholder="email@company.com"
@@ -157,8 +152,8 @@ export default function RegisterPage() {
                     id="phone"
                     className={`bg-white w-full p-3 text-black border ${
                       phoneError
-                        ? "border-red placeholder-black"
-                        : "border-gray-200 placeholder-gray-400"
+                        ? 'border-red placeholder-black'
+                        : 'border-gray-200 placeholder-gray-400'
                     } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                     type="tel"
                     placeholder="Your phone number e.g. 091-234-5678"
@@ -186,8 +181,8 @@ export default function RegisterPage() {
                     id="password"
                     className={`bg-white w-full p-3 text-black border ${
                       passwordError
-                        ? "border-red placeholder-black"
-                        : "border-gray-200 placeholder-gray-400"
+                        ? 'border-red placeholder-black'
+                        : 'border-gray-200 placeholder-gray-400'
                     } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                     type="password"
                     placeholder="Create your password"
@@ -216,40 +211,11 @@ export default function RegisterPage() {
                 </button>
               </form>
               <div className="mt-6 flex flex-col gap-6">
-                <div className="flex items-center">
-                  <div className="flex-grow">
-                    <hr className="border-t-2 border-gray-200" />
-                  </div>
-                  <div className="px-4 text-body1 text-gray-400 whitespace-nowrap">
-                    Or Continue With
-                  </div>
-                  <div className="flex-grow">
-                    <hr className="border-t-2 border-gray-200" />
-                  </div>
-                </div>
-                <div className="flex space-x-4">
-                  <button className="flex items-center justify-center flex-grow w-full bg-gray-200 hover:bg-gray-100 active:bg-gray-300 text-gray-400 hover:text-black font-bold py-4 rounded-full">
-                    <img
-                      src="/facebook-logo.png"
-                      alt="facebook logo"
-                      className="w-5 h-5 mr-2"
-                    />
-                    Facebook
-                  </button>
-                  <button className="flex items-center justify-center flex-grow w-full bg-gray-200 hover:bg-gray-100 active:bg-gray-300 text-gray-400 hover:text-black font-bold py-4 rounded-full">
-                    <img
-                      src="/google-logo.png"
-                      alt="google logo"
-                      className="w-5 h-5 mr-2"
-                    />
-                    Gmail
-                  </button>
-                </div>
                 <div className="text-center text-black">
                   <p>
-                    Already have an account?
+                    Already have Pet Sitter account?
                     <a
-                      href="/login"
+                      href="/login/sitter"
                       className="text-orange-500 hover:text-orange-400 active:text-orange-600 pl-3 font-bold cursor-pointer"
                     >
                       Login
