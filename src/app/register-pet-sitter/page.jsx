@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import axios from 'axios';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
-import { BeatLoader } from 'react-spinners';
-import validator from 'validator';
+import axios from "axios";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { BeatLoader } from "react-spinners";
+import validator from "validator";
 
 export default function RegisterPetSitterPage() {
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [phoneError, setPhoneError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const router = useRouter();
 
   const validateEmail = () => {
@@ -28,15 +28,15 @@ export default function RegisterPetSitterPage() {
       );
       return false;
     }
-    setEmailError('');
+    setEmailError("");
     return true;
   };
 
   const validatePhone = () => {
     // ลบ ตัวอักษรที่ไม่ใช่ตัวเลข (เช่น ช่องว่าง, ขีดคั่น, วงเล็บ, และสัญลักษณ์อื่น ๆ) ออกจากสตริง phone และคืนค่าหมายเลขโทรศัพท์ที่มีเฉพาะตัวเลขเท่านั้น.
-    const normalizedPhone = phone.trim().replace(/\D/g, '');
+    const normalizedPhone = phone.trim().replace(/\D/g, "");
 
-    if (!validator.isMobilePhone(normalizedPhone, 'th-TH') && phone) {
+    if (!validator.isMobilePhone(normalizedPhone, "th-TH") && phone) {
       setPhoneError(
         <p>
           Please enter a valid Thai phone number.
@@ -46,16 +46,34 @@ export default function RegisterPetSitterPage() {
       );
       return false;
     }
-    setPhoneError('');
+    setPhoneError("");
     return true;
   };
 
   const validatePassword = () => {
-    if (password.length < 12 && password) {
-      setPasswordError('Password must be at least 12 characters long.');
+    const passwordComplexityPattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+
+    if (
+      password &&
+      (password.length < 12 ||
+        !validator.matches(password, passwordComplexityPattern))
+    ) {
+      setPasswordError(
+        <p>
+          Password must meet the following criteria:
+          <br />• At least <strong>12 characters long</strong>
+          <br />• Contain at least <strong>one uppercase letter (A-Z)</strong>
+          <br />• Contain at least <strong>one lowercase letter (a-z)</strong>
+          <br />• Contain at least <strong>one digit (0-9)</strong>
+          <br />• Contain at least{" "}
+          <strong>one special character (@$!%*?&)</strong>
+        </p>
+      );
       return false;
     }
-    setPasswordError('');
+
+    setPasswordError("");
     return true;
   };
 
@@ -64,7 +82,7 @@ export default function RegisterPetSitterPage() {
 
     // ตรวจสอบการกรอกข้อมูลก่อนส่ง
     if (!email.trim() || !phone.trim() || !password.trim()) {
-      toast.error('Please fill the information before submitting.');
+      toast.error("Please fill the information before submitting.");
       return;
     }
 
@@ -74,24 +92,24 @@ export default function RegisterPetSitterPage() {
     const isPasswordValid = validatePassword();
 
     if (!isEmailValid || !isPhoneValid || !isPasswordValid) {
-      toast.error('Please correct the errors before submitting.');
+      toast.error("Please correct the errors before submitting.");
       return;
     }
 
     // เริ่มส่งคำร้อง
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/register-pet-sitter', {
+      const response = await axios.post("/api/auth/register-pet-sitter", {
         email,
         phone,
-        password
+        password,
       });
 
       toast.success(response.data.message);
 
-      router.push('/login/sitter');
+      router.push("/login/sitter");
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Registration failed';
+      const errorMessage = err.response?.data?.error || "Registration failed";
       toast.error(errorMessage);
       console.log(errorMessage);
     } finally {
@@ -102,7 +120,7 @@ export default function RegisterPetSitterPage() {
     <main className="w-screen min-h-screen md:h-screen bg-white flex justify-center items-center">
       {loading ? (
         <div className="flex justify-center items-center">
-          <BeatLoader size={15} color={'#FF7037'} margin={2} />
+          <BeatLoader size={15} color={"#FF7037"} margin={2} />
         </div>
       ) : (
         <div className="w-full max-w-[1440px] h-full max-h-[1024px] md:relative flex justify-center items-center overflow-hidden">
@@ -123,8 +141,8 @@ export default function RegisterPetSitterPage() {
                     id="email"
                     className={`bg-white w-full p-3 text-black border ${
                       emailError
-                        ? 'border-red placeholder-black'
-                        : 'border-gray-200 placeholder-gray-400'
+                        ? "border-red placeholder-black"
+                        : "border-gray-200 placeholder-gray-400"
                     } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                     type="email"
                     placeholder="email@company.com"
@@ -152,8 +170,8 @@ export default function RegisterPetSitterPage() {
                     id="phone"
                     className={`bg-white w-full p-3 text-black border ${
                       phoneError
-                        ? 'border-red placeholder-black'
-                        : 'border-gray-200 placeholder-gray-400'
+                        ? "border-red placeholder-black"
+                        : "border-gray-200 placeholder-gray-400"
                     } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                     type="tel"
                     placeholder="Your phone number e.g. 091-234-5678"
@@ -181,8 +199,8 @@ export default function RegisterPetSitterPage() {
                     id="password"
                     className={`bg-white w-full p-3 text-black border ${
                       passwordError
-                        ? 'border-red placeholder-black'
-                        : 'border-gray-200 placeholder-gray-400'
+                        ? "border-red placeholder-black"
+                        : "border-gray-200 placeholder-gray-400"
                     } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 rounded-lg`}
                     type="password"
                     placeholder="Create your password"
