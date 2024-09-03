@@ -12,10 +12,6 @@ function Navbar({ session }) {
   const [isShow, setIsShow] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    // setIsUser("PiPo");
-  }, []);
-
   return (
     <nav className="w-full h-[80px] p-[12px_20px] flex justify-center items-center text-center lg:p-[0px_80px]">
       <div className="flex justify-between items-center text-center max-w-[1440px] p- w-full">
@@ -27,7 +23,7 @@ function Navbar({ session }) {
         {!session && (
           <div className="flex lg:gap-4 gap-0 text-body1 text-black max-sm:hidden">
             <Link
-              href="/register"
+              href="/login/sitter"
               className="lg:p-[16px_24px] p-[16px_20px] hover:text-gray-400 active:text-gray-600"
             >
               Become a Pet Sitter

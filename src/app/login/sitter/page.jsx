@@ -5,8 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import { signIn } from "next-auth/react";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 
 function LoginSitterPage() {
   const router = useRouter();
@@ -38,6 +37,7 @@ function LoginSitterPage() {
           setFieldError("password", result.error);
         }
       } else {
+        toast.success("Login successful!");
         router.replace("/sitter");
       }
     } catch (error) {
@@ -54,19 +54,7 @@ function LoginSitterPage() {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-      <div className="sm:w-[440px] w-full p-0 sm:p-[60px_16px] flex flex-col justify-between sm:gap-[56px] gap-[40px]">
+      <div className="sm:w-[440px] w-full sm:p-0 p-[60px_16px] flex flex-col justify-between sm:gap-[56px] gap-[40px]">
         <div className="flex flex-col justify-center items-center">
           <h1 className="sm:text-head1 text-[36px] font-bold text-black">
             Welcome Back!
@@ -179,8 +167,9 @@ function LoginSitterPage() {
                 <p className="flex gap-[8px] justify-center items-center text-[#060D18] text-body1">
                   Don’t have Pet Sitter account?
                   <button
+                    type="button"
                     className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px]"
-                    onClick={() => router.push("/register")}
+                    onClick={() => router.push("/register-pet-sitter")}
                   >
                     Register
                   </button>
@@ -188,6 +177,13 @@ function LoginSitterPage() {
               </Form>
             )}
           </Formik>
+          <button
+            type="button"
+            className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px]"
+            onClick={() => router.push("/")}
+          >
+            Back to Home
+          </button>
         </div>
       </div>
     </div>
