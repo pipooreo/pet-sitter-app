@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BeatLoader } from "react-spinners";
+import validator from "validator";
 
 export default function PasswordReset() {
   const [email, setEmail] = useState("");
@@ -37,8 +38,25 @@ export default function PasswordReset() {
   };
 
   const validateNewPassword = () => {
-    if (newPassword.length < 12 && newPassword) {
-      setNewPasswordError("Password must be at least 12 characters long.");
+    const passwordComplexityPattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
+
+    if (
+      newPassword &&
+      (newPassword.length < 12 ||
+        !validator.matches(password, passwordComplexityPattern))
+    ) {
+      setNewPasswordError(
+        <p>
+          Password must meet the following criteria:
+          <br />• At least <strong>12 characters long</strong>
+          <br />• Contain at least <strong>one uppercase letter (A-Z)</strong>
+          <br />• Contain at least <strong>one lowercase letter (a-z)</strong>
+          <br />• Contain at least <strong>one digit (0-9)</strong>
+          <br />• Contain at least{" "}
+          <strong>one special character (@$!%*?&)</strong>
+        </p>
+      );
       return false;
     }
     setNewPasswordError("");
@@ -95,7 +113,7 @@ export default function PasswordReset() {
       const response = await axios.post("/api/auth/password-reset", {
         email,
         otp: otpString,
-        newPassword
+        newPassword,
       });
       toast.success(response.data.message);
       router.push("/login");
@@ -115,7 +133,7 @@ export default function PasswordReset() {
         <h1 className="text-head2 md:text-head1 text-black">Reset Password</h1>
         <form
           onSubmit={handleResetPassword}
-          className="mt-6 flex flex-col gap-4"
+          className="mt-6 flex flex-col gap-6"
         >
           {errorMessage && (
             <div className="relative border border-red p-3 rounded-lg">
