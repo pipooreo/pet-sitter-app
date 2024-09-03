@@ -9,30 +9,33 @@ function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [rememberMe, setRememberMe] = useState(false);
+  const handleHi = async () => {
+    try {
+      toast.info("HEHE XD");
+    } catch (error) {}
+  };
+  useEffect(() => {
+    const rememberMeStored = localStorage.getItem("rememberMe");
+    setRememberMe(rememberMeStored === "true");
+  }, []);
 
-  // useEffect(() => {
-  //   console.log("hi", session);
-  // }, []);
-
-  // useEffect(() => {
-  //   const rememberMeStored = localStorage.getItem("rememberMe");
-  //   toast.info("hi admin lol");
-  //   if (rememberMeStored !== null) {
-  //     setRememberMe(rememberMeStored === "true");
-  //   } else {
-  //     console.log("rememberMeStored is null");
-  //   }
-
-  //   if (status === "unauthenticated") {
-  //     router.push("/login");
-  //   }
-  // }, [status, router]);
+  useEffect(() => {
+    // Redirect to login if the session is not valid or expired
+    if (status === "authenticated" && session) {
+      const tokenExpiration = session?.expires; // Adjust based on your actual session expiration handling
+      const now = Date.now() / 1000; // Current time in seconds
+      if (tokenExpiration && tokenExpiration < now) {
+        signOut({ redirect: false });
+        router.push("/login");
+      }
+    }
+  }, [status, session]);
 
   const handleLogout = async () => {
     try {
-      toast.info("HEHE XD");
-      await signOut({ redirect: false });
       localStorage.removeItem("rememberMe");
+      await signOut({ redirect: false });
+      toast.info("Sign out successfully XD");
 
       setTimeout(() => {
         router.push("/login");
@@ -49,18 +52,6 @@ function AdminPage() {
   return (
     <MainLayout session={session}>
       <div>
-        <ToastContainer
-          position="top-center"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
         <h1>Admin Page</h1>
         {session && <div>{session.user.email}</div>}
         {/* <div>session {session.user.email}</div> */}
@@ -70,6 +61,7 @@ function AdminPage() {
         >
           Logout
         </button>
+        <button onClick={handleHi}> meow</button>
         <div>Is remember me checked? {rememberMe ? "Yes" : "No"}</div>
       </div>
     </MainLayout>

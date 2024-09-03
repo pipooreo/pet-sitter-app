@@ -12,8 +12,6 @@ const LoginPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [rememberMe, setRememberMe] = useState(false);
-  console.log("initial session", session);
-  console.log("initial status", status);
   useEffect(() => {
     if (status === "authenticated") {
       if (session.user.role === "admin") {
@@ -25,7 +23,7 @@ const LoginPage = () => {
       //   router.push("/sitter");
       // }
     }
-  }, [status, session, router]);
+  }, [status]);
 
   if (status === "loading") {
     return <div>Loading...</div>;
@@ -41,6 +39,7 @@ const LoginPage = () => {
       .email("Please enter a valid email (email@company.com)")
       .required("Please enter your email"),
     password: Yup.string().required("Please enter your password"),
+    // remember: yup.boolean(),
   });
 
   const handleRememberMeChange = () => {
@@ -58,32 +57,20 @@ const LoginPage = () => {
         redirect: false,
         email: values.email,
         password: values.password,
+        rememberMe: rememberMe, // Pass rememberMe flag
+        callbackUrl: "/admin", // Optionally add callback URL here
       });
 
       if (result.error) {
-        if (result.error === "Invalid password") {
-          toast.error("Invalid password. Please try again.");
-          console.log("error", result);
-        } else if (result.error === "User not found") {
-          toast.error("User not found. Please check your email and try again.");
-        } else {
-          toast.error("Email or Password is wrong");
-          // if not succedd > credentialpasswordiswrong smth, น่่าจะปกติเพราะมันเชคผิด
-          console.log("error", result);
-        }
-        // setFieldError("password", result.error);
+        toast.error("Email or Password is wrong");
       } else if (result.ok) {
-        localStorage.setItem("rememberMe", rememberMe.toString());
-
-        if (session.user.role === "admin") {
-          router.push("/admin");
-        } else if (session.user.role === "owner") {
-          router.push("/");
-        }
+        // Update cookie logic if needed
+        document.cookie = `rememberMe=${rememberMe}; path=/`;
+        router.push(result.url || "/admin");
       }
     } catch (error) {
       toast.error("Email or Password is wrong");
-      setFieldError("password", "Email or Password is wrong");
+      // setFieldError("password", "Email or Password is wrong");
     } finally {
       setSubmitting(false);
     }
@@ -92,18 +79,10 @@ const LoginPage = () => {
   return (
     <MainLayout>
       <div className="flex justify-center items-center h-screen">
-        <ToastContainer
-          position="top-center"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+        <div className="w-[239px] h-[350px] hidden md:block md:absolute md:top-[75px] md:right-0 bg-[url('/paw-yellow.png')] bg-contain bg-center bg-no-repeat"></div>
+        <div className="w-[144px] h-[144px] absolute top-[-57px] right-[-10px] md:hidden bg-[url('/paw-yellow.png')] bg-contain bg-center bg-no-repeat"></div>
+        <div className="w-[318px] h-[310px] hidden md:block md:absolute md:bottom-[-105px] md:left-[-80px] bg-[url('/star-green.png')] bg-contain bg-center bg-no-repeat rotate-[-15deg]"></div>
+        <div className="w-[166px] h-[88px] hidden md:block md:absolute md:bottom-[210px] md:left-0 bg-[url('/ellipse-blue.png')] bg-contain bg-center bg-no-repeat"></div>
         <div className="w-[440px] flex flex-col justify-between gap-[56px]">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-head1">Welcome Back!</h1>
@@ -117,7 +96,7 @@ const LoginPage = () => {
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
             >
-              {({ errors, touched, isSubmitting }) => (
+              {({ isSubmitting }) => (
                 <Form className="flex flex-col">
                   <label htmlFor="email" className="font-black text-body2">
                     Email
@@ -126,11 +105,9 @@ const LoginPage = () => {
                     type="email"
                     name="email"
                     placeholder="email@company.com"
-                    className={`mb-2 p-2 border w-full rounded outline-none transition-colors duration-200 ${
-                      errors.email && touched.email
-                        ? "border-red"
-                        : "border-gray-200"
-                    } focus:border-orange-400`}
+                    className={`mb-2 p-2 border w-full rounded outline-none transition-colors duration-200 
+                     
+                     focus:border-orange-400`}
                   />
                   <ErrorMessage
                     name="email"
@@ -142,11 +119,9 @@ const LoginPage = () => {
                   <Field
                     type="password"
                     name="password"
-                    className={`mb-2 p-2 border w-full rounded outline-none transition-colors duration-200 ${
-                      errors.password && touched.password
-                        ? "border-red"
-                        : "border-gray-200"
-                    } focus:border-orange-400`}
+                    className={`mb-2 p-2 border w-full rounded outline-none transition-colors duration-200 
+                  
+                     focus:border-orange-400`}
                   />
                   <ErrorMessage
                     name="password"
