@@ -13,7 +13,11 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        return authorizeUser(credentials, "sitter");
+        const user = await authorizeUser(credentials, "sitter");
+        if (user) {
+          user.rememberMe = credentials.rememberMe;
+        }
+        return user;
       },
     }),
     CredentialsProvider({
@@ -36,7 +40,7 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ user }) {
-      return !!user; // Sign in only if the user exists
+      return true;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -57,6 +61,7 @@ export const authOptions = {
 
       return token;
     },
+    async session({ session, token }) {
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
@@ -114,7 +119,6 @@ async function authorizeUser(credentials, role) {
       name: user.rows[0].name,
       email: user.rows[0].email,
       role: user.rows[0].role,
-      // No need to return rememberMe for sitter
     };
   } catch (error) {
     console.error(`Error in authorize function for ${role}:`, error);
