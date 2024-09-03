@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import MainLayout from "@/components/layouts/MainLayout";
 import { useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();

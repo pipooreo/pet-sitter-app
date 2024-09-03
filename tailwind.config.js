@@ -19,6 +19,9 @@ module.exports = {
       xl: "1280px",
       custom: "1023px",
     },
+    z: {
+      zIndex: { 100: "100", 1: "1" },
+    },
     fontSize: {
       head1: [
         "56px",
