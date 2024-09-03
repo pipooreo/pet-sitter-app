@@ -11,9 +11,14 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
-        return authorizeUser(credentials, "sitter");
+        const user = await authorizeUser(credentials, "sitter");
+        if (user) {
+          user.rememberMe = credentials.rememberMe;
+        }
+        return user;
       },
     }),
     CredentialsProvider({
@@ -31,20 +36,32 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user }) {
       return true;
     },
-    jwt: async ({ token, user }) => {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.rememberMe = user.rememberMe; // Store rememberMe in token
+      }
+
+      // Update maxAge if rememberMe is true
+      if (token.rememberMe) {
+        token.maxAge = 7 * 24 * 60 * 60; // 7 days
+      } else {
+        token.maxAge = 30 * 60; // 30 minutes
       }
       return token;
     },
-    session: async ({ session, token }) => {
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.maxAge = token.maxAge; // Use maxAge from token
+        session.expires = new Date(
+          Date.now() + session.maxAge * 1000
+        ).toISOString(); // Set expiration dynamically
       }
       return session;
     },
@@ -62,7 +79,8 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 2 * 60 * 60,
+    maxAge: 2 * 60 * 60, // Default to 2hrs
+    updateAge: 60 * 60, // Optional: specify interval (in seconds) for rolling sessions
   },
 };
 
@@ -75,10 +93,7 @@ async function authorizeUser(credentials, role) {
       [credentials.email, role]
     );
 
-    console.log("Query result:", user);
-
     if (user.rows.length === 0) {
-      console.log("No user found");
       return null;
     }
 
@@ -87,25 +102,23 @@ async function authorizeUser(credentials, role) {
       user.rows[0].password
     );
 
-    console.log("Password validation result:", isValidPassword);
-
     if (!isValidPassword) {
-      console.log("Invalid password");
       return null;
     }
 
-    console.log("Authentication successful");
     return {
       id: user.rows[0].id,
       name: user.rows[0].name,
       email: user.rows[0].email,
       role: user.rows[0].role,
+      rememberMe: credentials.rememberMe, // Ensure rememberMe is returned
     };
   } catch (error) {
     console.error(`Error in authorize function for ${role}:`, error);
     return null;
   }
 }
+
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
