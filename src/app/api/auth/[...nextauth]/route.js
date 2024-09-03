@@ -11,7 +11,6 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
         const user = await authorizeUser(credentials, "sitter");
@@ -27,6 +26,7 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
         const user = await authorizeUser(credentials, "owner");
@@ -79,7 +79,7 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 2 * 60 * 60, // Default to 2hrs
+    maxAge: 30, // Default to 2hrs
     updateAge: 60 * 60, // Optional: specify interval (in seconds) for rolling sessions
   },
 };
