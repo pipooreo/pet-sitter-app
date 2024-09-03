@@ -154,7 +154,11 @@ function LoginSitterPage() {
                   />
                 </div>
 
-                <button className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px] text-center font-bold ">
+                <button
+                  type="button"
+                  className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px] text-center font-bold "
+                  onClick={() => router.push("/password-reset")}
+                >
                   Forget Password?
                 </button>
                 <button

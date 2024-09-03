@@ -60,4 +60,5 @@ export const config = {
     "/login/:path*",
     "/register",
     "/",
-  ]
+  ],
+};
