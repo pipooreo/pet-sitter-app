@@ -13,6 +13,7 @@ export async function middleware(req) {
   if (url.pathname.startsWith("/api/auth/password")) {
     return validateResetPassword(req);
   }
+
   if (!token) {
     // ป้องกันไม่ให้เข้าถึงหน้า /sitter หรือ /admin ถ้าไม่มี token
     if (
@@ -24,7 +25,11 @@ export async function middleware(req) {
     return NextResponse.next();
   }
 
-  if (url.pathname === "/login" || url.pathname === "/register") {
+  if (
+    url.pathname === "/login" ||
+    url.pathname === "/register" ||
+    url.pathname === "/password-reset"
+  ) {
     // แบ่งการ redirect ตาม role ของผู้ใช้
     if (token.role === "owner") {
       return NextResponse.redirect(new URL("/", url.origin));
@@ -60,5 +65,6 @@ export const config = {
     "/login/:path*",
     "/register",
     "/",
+    "/password-reset",
   ],
 };

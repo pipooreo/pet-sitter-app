@@ -72,6 +72,7 @@ export default function RegisterPage() {
       );
       return false;
     }
+
     setPasswordError("");
     return true;
   };
@@ -101,7 +102,6 @@ export default function RegisterPage() {
       const response = await axios.post("/api/auth/register", {
         email,
         phone,
-        password,
         password,
       });
 
