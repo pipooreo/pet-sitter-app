@@ -1,17 +1,20 @@
 import isEmail from "validator/lib/isEmail";
-import isMobilePhone from "validator/lib/isMobilePhone";
 import isLength from "validator/lib/isLength";
 import matches from "validator/lib/matches";
 import { NextResponse } from "next/server";
 
-export async function validateUser(req) {
-  const { email, phone, password } = await req.json();
+export async function validateResetPassword(req) {
+  const { email, otp, newPassword } = await req.json();
 
-  if (!email.trim() || !phone.trim() || !password.trim()) {
+  if (!email.trim() || !otp || !newPassword.trim()) {
     return NextResponse.json(
-      { error: "Email, phone, and password are required." },
+      { error: "Missing required fields." },
       { status: 400 }
     );
+  }
+
+  if (otp.length !== 6) {
+    return NextResponse.json({ error: "Invalid otp" }, { status: 400 });
   }
 
   if (!isEmail(email)) {
@@ -21,14 +24,7 @@ export async function validateUser(req) {
     );
   }
 
-  if (!isMobilePhone(phone, "th-TH")) {
-    return NextResponse.json(
-      { error: "Invalid phone number format" },
-      { status: 400 }
-    );
-  }
-
-  if (!isLength(password, { min: 12 })) {
+  if (!isLength(newPassword, { min: 12 })) {
     return NextResponse.json(
       { error: "Password must be at least 12 characters long" },
       { status: 400 }
@@ -37,7 +33,7 @@ export async function validateUser(req) {
 
   const passwordComplexityPattern =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
-  if (!matches(password, passwordComplexityPattern)) {
+  if (!matches(newPassword, passwordComplexityPattern)) {
     return NextResponse.json(
       {
         error:

@@ -1,3 +1,5 @@
+import { validateResetPassword } from "./middlewares/validate.reset.password";
+import { validateUser } from "./middlewares/validate.user";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 
@@ -8,7 +10,9 @@ export async function middleware(req) {
   if (url.pathname.startsWith("/api/auth/register")) {
     return validateUser(req);
   }
-  // register validate end//
+  if (url.pathname.startsWith("/api/auth/password")) {
+    return validateResetPassword(req);
+  }
   if (!token) {
     // ป้องกันไม่ให้เข้าถึงหน้า /sitter หรือ /admin ถ้าไม่มี token
     if (
@@ -50,10 +54,10 @@ export const config = {
     "/api/auth/register",
     "/api/auth/login",
     "/api/auth/register-pet-sitter",
+    "/api/auth/password-reset",
     "/sitter/:path*",
     "/admin/:path*",
     "/login/:path*",
     "/register",
     "/",
-  ],
-};
+  ]
