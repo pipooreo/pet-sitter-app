@@ -13,11 +13,7 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const user = await authorizeUser(credentials, "sitter");
-        if (user) {
-          user.rememberMe = credentials.rememberMe;
-        }
-        return user;
+        return authorizeUser(credentials, "sitter");
       },
     }),
     CredentialsProvider({
@@ -26,42 +22,49 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        rememberMe: { label: "Remember me", type: "checkbox" },
+        rememberMe: { label: "Remember me", type: "checkbox" }, // Only here
       },
       async authorize(credentials) {
         const user = await authorizeUser(credentials, "owner");
-        if (user) return user;
+        if (user) {
+          user.rememberMe = credentials.rememberMe; // Assign rememberMe only for owner/admin
+          return user;
+        }
         return authorizeUser(credentials, "admin");
       },
     }),
   ],
   callbacks: {
     async signIn({ user }) {
-      return true;
+      return !!user; // Sign in only if the user exists
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.rememberMe = user.rememberMe; // Store rememberMe in token
+
+        if (user.rememberMe !== undefined) {
+          token.rememberMe = user.rememberMe; // Only if rememberMe is present
+        }
       }
 
-      // Update maxAge if rememberMe is true
-      if (token.rememberMe) {
+      // Adjust maxAge dynamically based on rememberMe, only for owner-admin
+      if (token.rememberMe === true) {
         token.maxAge = 7 * 24 * 60 * 60; // 7 days
       } else {
-        token.maxAge = 30 * 60; // 30 minutes
+        token.maxAge = 30; // 30 minutes
       }
+
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
-        session.maxAge = token.maxAge; // Use maxAge from token
+        session.maxAge = token.maxAge;
         session.expires = new Date(
           Date.now() + session.maxAge * 1000
-        ).toISOString(); // Set expiration dynamically
+        ).toISOString();
       }
       return session;
     },
@@ -79,8 +82,8 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 30, // Default to 2hrs
-    updateAge: 60 * 60, // Optional: specify interval (in seconds) for rolling sessions
+    // maxAge: 30 * 60, // Default maxAge set to 30 minutes
+    // updateAge: 60 * 60, // Optional: specify interval (in seconds) for rolling sessions
   },
 };
 
@@ -111,7 +114,7 @@ async function authorizeUser(credentials, role) {
       name: user.rows[0].name,
       email: user.rows[0].email,
       role: user.rows[0].role,
-      rememberMe: credentials.rememberMe, // Ensure rememberMe is returned
+      // No need to return rememberMe for sitter
     };
   } catch (error) {
     console.error(`Error in authorize function for ${role}:`, error);
