@@ -124,7 +124,7 @@ const LoginPage = () => {
                       type="email"
                       name="email"
                       placeholder="email@company.com"
-                      className={`mb-2 p-2 pr-10 w-full border rounded-lg outline-none transition-colors duration-200
+                      className={`mb-2 p-2 pr-10 w-full bg-white border rounded-lg outline-none transition-colors duration-200
                   ${
                     errors.email && touched.email
                       ? "border-red"
@@ -164,7 +164,7 @@ const LoginPage = () => {
                     <Field
                       type="password"
                       name="password"
-                      className={`mb-2 p-2 border w-full rounded-lg outline-none transition-colors duration-200
+                      className={`mb-2 p-2 border w-full bg-white rounded-lg outline-none transition-colors duration-200
                   ${
                     errors.password && touched.password
                       ? "border-red"
