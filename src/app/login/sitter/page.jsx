@@ -29,7 +29,6 @@ function LoginSitterPage() {
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
-    setLoading(true);
     try {
       const result = await signIn("sitter-login", {
         redirect: false,
@@ -45,6 +44,7 @@ function LoginSitterPage() {
           setFieldError("password", result.error);
         }
       } else {
+        setLoading(true);
         toast.success("Login successful!");
         router.replace("/sitter");
       }

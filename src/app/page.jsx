@@ -1,4 +1,5 @@
 "use client";
+import React, { useState } from "react";
 import Activity from "@/components/home/Activity";
 import HomeFooter from "@/components/home/HomeFooter";
 import HomeHeader from "@/components/home/HomeHeader";
@@ -9,10 +10,10 @@ import { BeatLoader } from "react-spinners";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  console.log(session);
-  if (status === "loading") {
+  const [loading, setLoading] = useState(false);
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen justify-center items-center">
         <BeatLoader size={15} color={"#FF7037"} margin={2} />
       </div>
     );
