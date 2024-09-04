@@ -6,7 +6,8 @@ function Activity() {
       <div className="w-full flex lg:justify-center">
         <div className="flex flex-col items-center p-[40px_16px]">
           <h3 className="text-head3 lg:text-head2 text-center text-black ">
-            "Your Pets, Our Priority: Perfect Care, Anytime, Anywhere."
+            &quot;Your Pets, Our Priority: Perfect Care, Anytime,
+            Anywhere.&quot;
           </h3>
 
           <div className="flex flex-col gap-10 py-[40px] md:flex-row md:justify-between items-center xl:w-[1064px] grow">
@@ -16,9 +17,9 @@ function Activity() {
                 <div className="flex flex-col gap-3">
                   <h4 className="text-black text-head4">Boarding</h4>
                   <p className="text-gray-500 text-body2">
-                    Your pets stay overnight in your sitter's home. They'll be
-                    treated like part of the family in a comfortable
-                    environment.
+                    Your pets stay overnight in your sitter&apos;s home.
+                    They&apos;ll be treated like part of the family in a
+                    comfortable environment.
                   </p>
                 </div>
               </div>
@@ -76,7 +77,7 @@ function Activity() {
               </h3>
 
               <p className="text-gray-500 text-body1 text-center">
-                Find a verified and reviewed sitter who'll keep your pets
+                Find a verified and reviewed sitter who&apos;ll keep your pets
                 company and give time.
               </p>
             </div>
@@ -88,7 +89,7 @@ function Activity() {
             />
             <div className="flex flex-col gap-4 items-center">
               <h3 className="text-head3 text-blue-500 text-center">
-                Better{" "}
+                Better
                 <span className="text-black text-head3">For Your Pets</span>
               </h3>
 
