@@ -169,7 +169,7 @@ function LoginSitterPage() {
                   onClick={() => {
                     setLoading(true);
 
-                    router.push("/password-reset");
+                    router.push("/forgot-password");
                   }}
                 >
                   Forget Password?

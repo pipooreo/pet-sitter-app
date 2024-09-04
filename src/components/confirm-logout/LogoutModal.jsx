@@ -1,7 +1,8 @@
 // components/Modal.js
+"use client";
 
 import React from "react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
@@ -59,7 +60,7 @@ const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
               className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 rounded-full text-white p-[12px_24px] "
               onClick={handleLogout}
             >
-              Yes, I’m sure
+              Yes, I'm sure
             </button>
           </div>
         </div>
