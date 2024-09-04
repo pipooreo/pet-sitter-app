@@ -1,13 +1,14 @@
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { AuthProvider } from "./Providers";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: 'Pet Sitter',
-  description: ''
+  title: "Pet Sitter",
+  description: "",
 };
 
 export default function RootLayout({ children }) {
@@ -17,7 +18,7 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.cdnfonts.com/css/satoshi" rel="stylesheet" />
       </head>
       <body className={`font-satoshi bg-white ${inter.className}`}>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <ToastContainer
           position="top-center"
           autoClose={6000}
