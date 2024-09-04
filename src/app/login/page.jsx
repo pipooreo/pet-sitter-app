@@ -107,14 +107,14 @@ const LoginPage = () => {
             Find the best Pet Sitter with us
           </h3>
         </div>
-        <div className="flex flex-col justify-center w-full">
+        <div className="flex flex-col justify-center w-full bg-white">
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="flex flex-col gap-[32px]">
+              <Form className="flex flex-col gap-[32px] ">
                 <div>
                   <label htmlFor="email" className="text-black text-body2 ">
                     Email

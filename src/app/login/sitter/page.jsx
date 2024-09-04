@@ -79,7 +79,7 @@ function LoginSitterPage() {
             onSubmit={handleSubmit}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="flex flex-col gap-[32px]">
+              <Form className="flex flex-col gap-[32px] bg-white">
                 <div>
                   <label htmlFor="email" className="text-black text-body2 ">
                     Email
