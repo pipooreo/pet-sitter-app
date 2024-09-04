@@ -55,8 +55,8 @@ function LoginSitterPage() {
         "password",
         "An unexpected error occurred. Please try again."
       );
-    } finally {
       setLoading(false);
+    } finally {
       setSubmitting(false);
     }
   };
