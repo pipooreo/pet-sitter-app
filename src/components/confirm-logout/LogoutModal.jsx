@@ -6,8 +6,6 @@ import { signOut } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
-  if (!isOpen) return null;
-
   const router = useRouter();
   const handleLogout = async () => {
     try {
@@ -21,6 +19,7 @@ const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
       console.error("Error during logout:", error);
     }
   };
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center ">
