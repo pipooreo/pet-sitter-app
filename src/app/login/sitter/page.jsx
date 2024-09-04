@@ -55,8 +55,8 @@ function LoginSitterPage() {
         "password",
         "An unexpected error occurred. Please try again."
       );
-    } finally {
       setLoading(false);
+    } finally {
       setSubmitting(false);
     }
   };
@@ -79,7 +79,7 @@ function LoginSitterPage() {
             onSubmit={handleSubmit}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="flex flex-col gap-[32px]">
+              <Form className="flex flex-col gap-[32px] bg-white">
                 <div>
                   <label htmlFor="email" className="text-black text-body2 ">
                     Email
@@ -89,7 +89,7 @@ function LoginSitterPage() {
                       type="email"
                       name="email"
                       placeholder="email@company.com"
-                      className={`mb-2 p-2 pr-10 w-full border rounded-lg outline-none transition-colors duration-200
+                      className={`mb-2 p-2 pr-10 w-full bg-white border rounded-lg outline-none transition-colors duration-200
                     ${
                       errors.email && touched.email
                         ? "border-red"
@@ -129,7 +129,7 @@ function LoginSitterPage() {
                     <Field
                       type="password"
                       name="password"
-                      className={`mb-2 p-2 border w-full rounded-lg outline-none transition-colors duration-200
+                      className={`mb-2 p-2 border bg-white w-full rounded-lg outline-none transition-colors duration-200
                     ${
                       errors.password && touched.password
                         ? "border-red"
