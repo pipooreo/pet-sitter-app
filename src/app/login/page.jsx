@@ -211,7 +211,7 @@ const LoginPage = () => {
                   <button
                     type="button"
                     className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px] text-center font-bold "
-                    onClick={() => router.push("/password-reset")}
+                    onClick={() => router.push("/forgot-password")}
                   >
                     Forget Password?
                   </button>
