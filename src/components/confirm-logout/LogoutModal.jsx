@@ -44,7 +44,7 @@ const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
             </svg>
           </button>
         </div>
-        <div className="flex flex-col items-start  gap-[24px] p-[24px] ">
+        <div className="flex flex-col items-start  gap-[24px] p-[24px]">
           <p className="text-gray-400 text-[16px] font-bold">
             You will be logged out, proceed?
           </p>
@@ -59,7 +59,7 @@ const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
               className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 rounded-full text-white p-[12px_24px] "
               onClick={handleLogout}
             >
-              Yes, I'm sure
+              Yes, I&apos;m sure
             </button>
           </div>
         </div>
