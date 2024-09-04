@@ -1,19 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import { signIn } from "next-auth/react";
 import { toast } from "react-toastify";
-
+import { BeatLoader } from "react-spinners";
 function LoginSitterPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const initialValues = {
     email: "",
     password: "",
   };
-
+  if (loading) {
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <BeatLoader size={15} color={"#FF7037"} margin={2} />
+      </div>
+    );
+  }
   const validationSchema = Yup.object({
     email: Yup.string()
       .email("Please enter a format email (email@company.com)")
@@ -22,6 +29,7 @@ function LoginSitterPage() {
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+    setLoading(true);
     try {
       const result = await signIn("sitter-login", {
         redirect: false,
@@ -47,9 +55,10 @@ function LoginSitterPage() {
         "password",
         "An unexpected error occurred. Please try again."
       );
+    } finally {
+      setLoading(false);
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
   };
 
   return (
@@ -157,7 +166,11 @@ function LoginSitterPage() {
                 <button
                   type="button"
                   className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px] text-center font-bold "
-                  onClick={() => router.push("/password-reset")}
+                  onClick={() => {
+                    setLoading(true);
+
+                    router.push("/password-reset");
+                  }}
                 >
                   Forget Password?
                 </button>
@@ -173,7 +186,11 @@ function LoginSitterPage() {
                   <button
                     type="button"
                     className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px]"
-                    onClick={() => router.push("/register-pet-sitter")}
+                    onClick={() => {
+                      setLoading(true);
+
+                      router.push("/register-pet-sitter");
+                    }}
                   >
                     Register
                   </button>
@@ -184,7 +201,11 @@ function LoginSitterPage() {
           <button
             type="button"
             className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px]"
-            onClick={() => router.push("/")}
+            onClick={() => {
+              setLoading(true);
+
+              router.push("/");
+            }}
           >
             Back to Home
           </button>

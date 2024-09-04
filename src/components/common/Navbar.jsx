@@ -9,15 +9,28 @@ import { FaRegUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { PiBell } from "react-icons/pi";
 import LogoutModal from "../confirm-logout/LogoutModal";
+import { BeatLoader } from "react-spinners";
+
 function Navbar({ session }) {
   const [isOpen, setIsOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
+  if (isLoading) {
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <BeatLoader size={15} color={"#FF7037"} margin={2} />
+      </div>
+    );
+  }
   function handleDropDown() {
     console.log("first");
     setIsOpen(!isOpen); // Toggle dropdown visibility
   }
   const handleOpenModal = () => {
+    setIsPressed(true);
     setConfirmLogout(true);
   };
 
@@ -26,7 +39,7 @@ function Navbar({ session }) {
   };
 
   return (
-    <nav className="w-full h-[80px] relative p-[12px_20px] flex justify-center items-center text-center lg:p-[0px_80px]">
+    <nav className="w-full h-[80px]  p-[12px_20px] flex justify-center items-center text-center lg:p-[0px_80px]">
       <div className="flex justify-between items-center text-center max-w-[1440px] p- w-full">
         <img
           src="/logo-black.png"
@@ -35,24 +48,36 @@ function Navbar({ session }) {
         />
         {!session && (
           <div className="flex lg:gap-4 gap-0 text-body1 text-black  max-sm:hidden">
-            <Link
-              href="/login/sitter"
+            <button
+              onClick={() => {
+                setIsLoading(true);
+
+                router.push("/login/sitter");
+              }}
               className="lg:p-[16px_24px] p-[16px_20px] hover:text-orange-500 active:text-orange-600"
             >
               Become a Pet Sitter
-            </Link>
-            <Link
-              href="/login"
+            </button>
+            <button
+              onClick={() => {
+                setIsLoading(true);
+
+                router.push("/login");
+              }}
               className="lg:p-[16px_24px] p-[16px_20px] hover:text-orange-500 active:text-orange-600"
             >
               Login
-            </Link>
-            <Link
-              href=""
+            </button>
+            <button
+              onClick={() => {
+                setIsLoading(true);
+
+                router.push("/");
+              }}
               className="bg-orange-500 text-white rounded-full text-[16px] font-bold lg:p-[16px_24px] p-[16px_20px] hover:bg-orange-400 active:bg-orange-600"
             >
               Find A Pet Sitter
-            </Link>
+            </button>
           </div>
         )}
         {session && (
@@ -65,10 +90,16 @@ function Navbar({ session }) {
                 <FaRegComments className="w-[24px] h-[24px] text-gray-400" />
               </div>
               <button
-                className="w-[48px] h-[48px] bg-gray-100 rounded-full flex justify-center items-center"
+                className="w-[48px] h-[48px] bg-gray-100 rounded-full flex justify-center items-center relative"
                 onClick={handleDropDown}
               >
-                <FaRegUser className="w-[24px] h-[24px] text-gray-400" />
+                <FaRegUser
+                  className={`w-[24px] h-[24px] ${
+                    isOpen
+                      ? "text-orange-500"
+                      : "text-gray-400 hover:text-gray-500 active:text-gray-600"
+                  }`}
+                />
               </button>
             </div>
             <Link
@@ -79,20 +110,23 @@ function Navbar({ session }) {
             </Link>
           </div>
         )}
-
-        <div
-          className="w-[24px] h-[24px] flex flex-col justify-around sm:hidden"
-          onClick={handleDropDown}
-        >
-          <div className="border-2 rounded border-gray-600"></div>
-          <div className="border-2 rounded border-gray-600"></div>
-          <div className="border-2 rounded border-gray-600"></div>
+        <div className="sm:hidden flex justify-center items-center gap-[24px]">
+          <PiBell className="w-[24px] h-[24px] text-gray-400" />
+          <FaRegComments className="w-[24px] h-[24px] text-gray-400" />
+          <div
+            className="w-[24px] h-[24px] flex flex-col justify-around "
+            onClick={handleDropDown}
+          >
+            <div className="border-2 rounded border-gray-600"></div>
+            <div className="border-2 rounded border-gray-600"></div>
+            <div className="border-2 rounded border-gray-600"></div>
+          </div>
         </div>
       </div>
 
       {/* drop down */}
       {isOpen && session && (
-        <nav className="rounded-[4px] z-50 mt-2 p-[40px_16px] sm:p-[0px_4px] absolute top-[48px] sm:top-[70px] w-screen sm:w-[186px] sm:right-20 bg-white text-black text-body2 shadow-lg shadow-black/4">
+        <nav className="rounded-[4px] z-50 mt-2 p-[40px_16px] sm:p-[0px_4px] absolute top-[48px] sm:top-[70px] w-screen sm:w-[186px] sm:right-20  lg:right-36 xl:right-36 custom1:right-[14rem] custom2:right-[20rem] bg-white text-black text-body2 shadow-lg shadow-black/4">
           <div className="flex flex-col py-[8px] gap-[16px]">
             <button className="flex justify-start items-center gap-[16px] sm:gap-[12px]  p-[16px] sm:p-[8px_24px]  hover:text-gray-400">
               <svg
@@ -196,22 +230,38 @@ function Navbar({ session }) {
           />
         </nav>
       )}
+
       {isOpen && !session && (
         <nav className="rounded-[4px] z-50 mt-2 p-[40px_16px] sm:p-[0px_4px] absolute top-[48px] sm:top-[70px] w-screen sm:w-[186px] sm:right-20 bg-white text-black text-body1 shadow-lg shadow-black/4">
           <div className="flex flex-col f  py-[8px] gap-[16px] ">
             <button
               className="p-[16px] text-left hover:text-orange-500 active:text-orange-600"
-              onClick={() => router.push("/login/sitter")}
+              onClick={() => {
+                setIsLoading(true);
+
+                router.push("/login/sitter");
+              }}
             >
               Become a Pet Sitter
             </button>
             <button
               className="p-[16px] text-left hover:text-orange-500 active:text-orange-600"
-              onClick={() => router.push("/login")}
+              onClick={() => {
+                setIsLoading(true);
+
+                router.push("/login");
+              }}
             >
               Login
             </button>
-            <button className="bg-orange-500  w-full text-white rounded-full text-[16px] font-bold  p-[16px_20px] hover:bg-orange-400 active:bg-orange-600">
+            <button
+              className="bg-orange-500  w-full text-white rounded-full text-[16px] font-bold  p-[16px_20px] hover:bg-orange-400 active:bg-orange-600"
+              onClick={() => {
+                setIsLoading(true);
+
+                router.push("/");
+              }}
+            >
               Find A Pet Sitter
             </button>
           </div>

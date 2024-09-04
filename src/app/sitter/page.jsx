@@ -3,11 +3,11 @@ import { signOut, useSession } from "next-auth/react";
 import React from "react";
 import Navbar from "@/components/common/Navbar";
 import { toast } from "react-toastify";
-
+import { BeatLoader } from "react-spinners";
 import { useRouter } from "next/navigation"; // ใช้ useRouter จาก next/navigation
 
 function Sitterpage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter(); // เรียกใช้ useRouter
 
   const handleSignOut = async () => {
@@ -25,6 +25,14 @@ function Sitterpage() {
       toast.info("HEHE XD");
     } catch (error) {}
   };
+
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <BeatLoader size={15} color={"#FF7037"} margin={2} />
+      </div>
+    );
+  }
 
   return (
     <div>

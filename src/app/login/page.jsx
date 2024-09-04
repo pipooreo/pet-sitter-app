@@ -5,28 +5,35 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
 import { signIn, useSession } from "next-auth/react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import MainLayout from "@/components/layouts/MainLayout";
+
+import { BeatLoader } from "react-spinners";
 const LoginPage = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     if (status === "authenticated") {
-      if (session.user.role === "admin") {
+      if (session?.user?.role === "admin") {
         router.push("/admin");
-      } else if (session.user.role === "owner") {
+      } else if (session?.user?.role === "owner") {
         router.push("/");
+      } else {
+        setIsLoading(false);
       }
-      // else if (session.user.role === "sitter") {
-      //   router.push("/sitter");
-      // }
+    } else if (status === "unauthenticated") {
+      setIsLoading(false);
     }
-  }, [status]);
+  }, [status, session, router]);
 
-  if (status === "loading") {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex h-screen justify-center items-center">
+        <BeatLoader size={15} color={"#FF7037"} margin={2} />
+      </div>
+    );
   }
 
   const initialValues = {
@@ -56,6 +63,7 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
+    setIsLoading(true);
     try {
       const result = await signIn("owner-admin-login", {
         redirect: false,
@@ -64,15 +72,19 @@ const LoginPage = () => {
         rememberMe: rememberMe, // Pass rememberMe flag
         callbackUrl: "/admin", // Optionally add callback URL here
       });
-
+      setIsLoading(false);
       if (result.error) {
         toast.error("Email or Password is wrong");
       } else if (result.ok) {
         // Update cookie logic if needed
         document.cookie = `rememberMe=${rememberMe}; path=/`;
-        router.push(result.url || "/admin");
+
+        toast.success("Login successful!");
+        router.replace(result.url || "/admin");
+        setIsLoading(false);
       }
     } catch (error) {
+      setIsLoading(false);
       toast.error("Email or Password is wrong");
       // setFieldError("password", "Email or Password is wrong");
     } finally {
