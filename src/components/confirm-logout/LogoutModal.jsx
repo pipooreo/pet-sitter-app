@@ -2,12 +2,17 @@
 "use client";
 
 import React from "react";
+import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { BeatLoader } from "react-spinners";
 const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const router = useRouter();
   const handleLogout = async () => {
+    setButtonLoading(true);
     try {
       localStorage.removeItem("rememberMe");
       await signOut({ redirect: false });
@@ -17,6 +22,7 @@ const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
       router.replace("/");
     } catch (error) {
       console.error("Error during logout:", error);
+      setButtonLoading(false);
     }
   };
   if (!isOpen) return null;
@@ -55,11 +61,20 @@ const LogoutModal = ({ isOpen, onClose, setDropdownOpen }) => {
             >
               Close
             </button>
+
             <button
-              className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 rounded-full text-white p-[12px_24px] "
+              className={`text-white rounded-full p-[12px_24px] ${
+                buttonLoading
+                  ? "cursor-not-allowed bg-gray-200"
+                  : "hover:bg-orange-400 active:bg-orange-600 bg-orange-500"
+              }`}
               onClick={handleLogout}
             >
-              Yes, I&apos;m sure
+              {buttonLoading ? (
+                <BeatLoader size={10} color="#ff7037" />
+              ) : (
+                "Yes, I'm sure"
+              )}
             </button>
           </div>
         </div>

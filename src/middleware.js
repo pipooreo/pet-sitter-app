@@ -60,7 +60,7 @@ export const config = {
     "/api/auth/login",
     "/api/auth/register-pet-sitter",
     "/api/auth/password-reset",
-    "/sitter/:path*",
+    "/pet-sitter/:path*",
     "/admin/:path*",
     "/login/:path*",
     "/register",
