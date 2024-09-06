@@ -75,6 +75,7 @@ const LoginPage = () => {
       });
       if (result.error) {
         toast.error("Email or Password is wrong");
+        setButtonLoading(false);
       } else if (result.ok) {
         // Update cookie logic if needed
         document.cookie = `rememberMe=${rememberMe}; path=/`;
@@ -85,9 +86,8 @@ const LoginPage = () => {
     } catch (error) {
       // setIsLoading(false);
       toast.error("Email or Password is wrong");
+      setButtonLoading(false);
       // setFieldError("password", "Email or Password is wrong");
-    } finally {
-      setButtonLoading(false); // Stop button loading
     }
   };
 
@@ -224,16 +224,21 @@ const LoginPage = () => {
                         Forget Password?
                       </button>
                     </div>
+
                     <button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-white rounded-[99px] p-[12px_24px]"
+                      className={`text-white rounded-full p-[12px_24px] ${
+                        buttonLoading
+                          ? "cursor-not-allowed bg-gray-200"
+                          : "hover:bg-orange-400 active:bg-orange-600 bg-orange-500"
+                      }`}
+                      disabled={buttonLoading}
                     >
                       {buttonLoading ? (
-                        <BeatLoader size={10} color="#ffffff" />
+                        <BeatLoader size={10} color="#ff7037" />
                       ) : (
-                        "Sign In"
-                      )}{" "}
+                        "Login"
+                      )}
                     </button>
                     <p className="flex gap-[8px] justify-center items-center text-[#060D18] text-body1">
                       Don’t have Pet Sitter account?
