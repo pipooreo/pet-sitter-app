@@ -44,7 +44,7 @@ export async function middleware(req) {
   if (token.role === "owner" && url.pathname !== "/") {
     return NextResponse.redirect(new URL("/", url.origin));
   }
-  if (token.role === "sitter" && !url.pathname.startsWith("/sitter")) {
+  if (token.role === "sitter" && !url.pathname.startsWith("/pet-sitter")) {
     return NextResponse.redirect(new URL("/pet-sitter", url.origin));
   }
   if (token.role === "admin" && !url.pathname.startsWith("/admin")) {
