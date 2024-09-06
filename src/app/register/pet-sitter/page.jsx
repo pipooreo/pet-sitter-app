@@ -242,7 +242,7 @@ export default function RegisterPetSitterPage() {
                   <p>
                     Already have Pet Sitter account?
                     <a
-                      href="/login/sitter"
+                      href="/login/pet-sitter"
                       className="text-orange-500 hover:text-orange-400 active:text-orange-600 pl-3 font-bold cursor-pointer"
                     >
                       Login

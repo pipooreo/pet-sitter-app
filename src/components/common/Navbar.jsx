@@ -52,7 +52,7 @@ function Navbar({ session }) {
               onClick={() => {
                 setIsLoading(true);
 
-                router.push("/login/sitter");
+                router.push("/login/pet-sitter");
               }}
               className="lg:p-[16px_24px] p-[16px_20px] hover:text-orange-500 active:text-orange-600"
             >
@@ -72,7 +72,7 @@ function Navbar({ session }) {
               onClick={() => {
                 setIsLoading(true);
 
-                router.push("/");
+                router.push("/search");
               }}
               className="bg-orange-500 text-white rounded-full text-[16px] font-bold lg:p-[16px_24px] p-[16px_20px] hover:bg-orange-400 active:bg-orange-600"
             >
