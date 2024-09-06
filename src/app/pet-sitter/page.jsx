@@ -14,7 +14,7 @@ function Sitterpage() {
     try {
       await signOut({ redirect: false }); // ป้องกันการรีไดเรกต์ทันที
       toast.success("Logged out successfully!"); // แสดง toast เมื่อออกจากระบบสำเร็จ
-      router.replace("/login/sitter"); // นำทางไปยังหน้า login
+      router.replace("/login/pet-sitter"); // นำทางไปยังหน้า login
     } catch (error) {
       toast.error("An error occurred while logging out.");
     }

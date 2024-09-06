@@ -108,7 +108,7 @@ export default function RegisterPetSitterPage() {
       });
       setLoading(true);
       toast.success(response.data.message);
-      router.push("/login/sitter");
+      router.push("/login/pet-sitter");
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Registration failed";
       toast.error(errorMessage);
