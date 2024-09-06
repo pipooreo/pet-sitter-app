@@ -46,7 +46,7 @@ function LoginSitterPage() {
       } else {
         setLoading(true);
         toast.success("Login successful!");
-        router.replace("/sitter");
+        router.replace("/pet-sitter");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -169,7 +169,7 @@ function LoginSitterPage() {
                   onClick={() => {
                     setLoading(true);
 
-                    router.push("/forgot-password");
+                    router.push("/auth/forgot-password");
                   }}
                 >
                   Forget Password?
@@ -189,7 +189,7 @@ function LoginSitterPage() {
                     onClick={() => {
                       setLoading(true);
 
-                      router.push("/register-pet-sitter");
+                      router.push("/register/pet-sitter");
                     }}
                   >
                     Register

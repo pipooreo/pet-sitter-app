@@ -48,7 +48,7 @@ export default function ForgotPassword() {
     setLoading(true);
     try {
       const response = await axios.post("/api/auth/forgot-password", {
-        email
+        email,
       });
       toast.success(response.data.message);
       setSuccessMessage(
