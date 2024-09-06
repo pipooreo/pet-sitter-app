@@ -15,6 +15,7 @@ export default function RegisterPetSitterPage() {
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [buttonLoading, setButtonLoading] = useState(false);
   const router = useRouter();
 
   const validateEmail = () => {
@@ -79,10 +80,11 @@ export default function RegisterPetSitterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    setButtonLoading(true);
     // ตรวจสอบการกรอกข้อมูลก่อนส่ง
     if (!email.trim() || !phone.trim() || !password.trim()) {
       toast.error("Please fill the information before submitting.");
+      setButtonLoading(false);
       return;
     }
 
@@ -93,27 +95,26 @@ export default function RegisterPetSitterPage() {
 
     if (!isEmailValid || !isPhoneValid || !isPasswordValid) {
       toast.error("Please correct the errors before submitting.");
+      setButtonLoading(false);
       return;
     }
 
     // เริ่มส่งคำร้อง
-    setLoading(true);
     try {
       const response = await axios.post("/api/auth/register-pet-sitter", {
         email,
         phone,
         password,
       });
-
+      setLoading(true);
       toast.success(response.data.message);
-
       router.push("/login/sitter");
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Registration failed";
       toast.error(errorMessage);
       console.log(errorMessage);
-    } finally {
       setLoading(false);
+      setButtonLoading(false);
     }
   };
   return (
@@ -220,12 +221,20 @@ export default function RegisterPetSitterPage() {
                     </>
                   )}
                 </div>
-
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 w-full rounded-full text-white p-4"
+                  className={`text-white rounded-full p-[12px_24px] ${
+                    buttonLoading
+                      ? "cursor-not-allowed bg-gray-200"
+                      : "hover:bg-orange-400 active:bg-orange-600 bg-orange-500"
+                  }`}
+                  disabled={buttonLoading}
                 >
-                  Register
+                  {buttonLoading ? (
+                    <BeatLoader size={10} color="#ff7037" />
+                  ) : (
+                    " Register"
+                  )}
                 </button>
               </form>
               <div className="mt-6 flex flex-col gap-6">

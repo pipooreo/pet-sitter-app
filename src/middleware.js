@@ -17,7 +17,7 @@ export async function middleware(req) {
   if (!token) {
     // ป้องกันไม่ให้เข้าถึงหน้า /sitter หรือ /admin ถ้าไม่มี token
     if (
-      url.pathname.startsWith("/sitter") ||
+      url.pathname.startsWith("/pet-sitter") ||
       url.pathname.startsWith("/admin")
     ) {
       return NextResponse.redirect(new URL("/", url.origin));
@@ -34,7 +34,7 @@ export async function middleware(req) {
     if (token.role === "owner") {
       return NextResponse.redirect(new URL("/", url.origin));
     } else if (token.role === "sitter") {
-      return NextResponse.redirect(new URL("/sitter", url.origin));
+      return NextResponse.redirect(new URL("/pet-sitter", url.origin));
     } else if (token.role === "admin") {
       return NextResponse.redirect(new URL("/admin", url.origin));
     }
@@ -45,7 +45,7 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL("/", url.origin));
   }
   if (token.role === "sitter" && !url.pathname.startsWith("/sitter")) {
-    return NextResponse.redirect(new URL("/sitter", url.origin));
+    return NextResponse.redirect(new URL("/pet-sitter", url.origin));
   }
   if (token.role === "admin" && !url.pathname.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/admin", url.origin));
@@ -60,7 +60,7 @@ export const config = {
     "/api/auth/login",
     "/api/auth/register-pet-sitter",
     "/api/auth/password-reset",
-    "/sitter/:path*",
+    "/pet-sitter/:path*",
     "/admin/:path*",
     "/login/:path*",
     "/register",

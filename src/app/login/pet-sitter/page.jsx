@@ -10,6 +10,8 @@ import { BeatLoader } from "react-spinners";
 function LoginSitterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const initialValues = {
     email: "",
     password: "",
@@ -29,7 +31,7 @@ function LoginSitterPage() {
   });
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
-    setLoading(true);
+    setButtonLoading(true);
     try {
       const result = await signIn("sitter-login", {
         redirect: false,
@@ -39,14 +41,17 @@ function LoginSitterPage() {
 
       if (result.error) {
         if (result.error === "CredentialsSignin") {
+          setButtonLoading(false);
           toast.error("Invalid email or password");
         } else {
           toast.error(result.error);
+          setButtonLoading(false);
           setFieldError("password", result.error);
         }
       } else {
+        setLoading(true);
         toast.success("Login successful!");
-        router.replace("/sitter");
+        router.replace("/pet-sitter");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -56,8 +61,7 @@ function LoginSitterPage() {
         "An unexpected error occurred. Please try again."
       );
       setLoading(false);
-    } finally {
-      setSubmitting(false);
+      setButtonLoading(false);
     }
   };
 
@@ -169,17 +173,26 @@ function LoginSitterPage() {
                   onClick={() => {
                     setLoading(true);
 
-                    router.push("/forgot-password");
+                    router.push("/auth/forgot-password");
                   }}
                 >
                   Forget Password?
                 </button>
+
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-white rounded-[99px] p-[12px_24px]"
+                  className={`text-white rounded-full p-[12px_24px] ${
+                    buttonLoading
+                      ? "cursor-not-allowed bg-gray-200"
+                      : "hover:bg-orange-400 active:bg-orange-600 bg-orange-500"
+                  }`}
+                  disabled={buttonLoading}
                 >
-                  Login
+                  {buttonLoading ? (
+                    <BeatLoader size={10} color="#ff7037" />
+                  ) : (
+                    "Login"
+                  )}
                 </button>
                 <p className="flex gap-[8px] justify-center items-center text-[#060D18] text-body1">
                   Don’t have Pet Sitter account?
@@ -189,7 +202,7 @@ function LoginSitterPage() {
                     onClick={() => {
                       setLoading(true);
 
-                      router.push("/register-pet-sitter");
+                      router.push("/register/pet-sitter");
                     }}
                   >
                     Register

@@ -14,6 +14,7 @@ const LoginPage = () => {
   const { data: session, status } = useSession();
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState(false);
   useEffect(() => {
     if (status === "authenticated") {
       if (session?.user?.role === "admin") {
@@ -63,7 +64,7 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async (values, { setSubmitting, setFieldError }) => {
-    setIsLoading(true);
+    setButtonLoading(true);
     try {
       const result = await signIn("owner-admin-login", {
         redirect: false,
@@ -72,19 +73,20 @@ const LoginPage = () => {
         rememberMe: rememberMe, // Pass rememberMe flag
         callbackUrl: "/admin", // Optionally add callback URL here
       });
-      setIsLoading(false);
       if (result.error) {
         toast.error("Email or Password is wrong");
+        setButtonLoading(false);
       } else if (result.ok) {
         // Update cookie logic if needed
         document.cookie = `rememberMe=${rememberMe}; path=/`;
-
+        setIsLoading(true);
         toast.success("Login successful!");
         router.replace(result.url || "/admin");
       }
     } catch (error) {
-      setIsLoading(false);
+      // setIsLoading(false);
       toast.error("Email or Password is wrong");
+      setButtonLoading(false);
       // setFieldError("password", "Email or Password is wrong");
     }
   };
@@ -217,17 +219,26 @@ const LoginPage = () => {
                       <button
                         type="button"
                         className="text-orange-500 hover:text-orange-400 active:text-orange-600 text-[16px] text-center font-bold "
-                        onClick={() => router.push("/forgot-password")}
+                        onClick={() => router.push("/auth/forgot-password")}
                       >
                         Forget Password?
                       </button>
                     </div>
+
                     <button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-white rounded-[99px] p-[12px_24px]"
+                      className={`text-white rounded-full p-[12px_24px] ${
+                        buttonLoading
+                          ? "cursor-not-allowed bg-gray-200"
+                          : "hover:bg-orange-400 active:bg-orange-600 bg-orange-500"
+                      }`}
+                      disabled={buttonLoading}
                     >
-                      Login
+                      {buttonLoading ? (
+                        <BeatLoader size={10} color="#ff7037" />
+                      ) : (
+                        "Login"
+                      )}
                     </button>
                     <p className="flex gap-[8px] justify-center items-center text-[#060D18] text-body1">
                       Don’t have Pet Sitter account?
