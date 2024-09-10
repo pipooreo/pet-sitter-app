@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense } from "react";
 import MainLayout from "@/components/layouts/MainLayout";
 import React, { useEffect, useState } from "react";
 import { FaStar } from "react-icons/fa";
@@ -286,4 +286,10 @@ function SearchPage() {
   );
 }
 
-export default SearchPage;
+export default function SearchPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPage />
+    </Suspense>
+  );
+}
