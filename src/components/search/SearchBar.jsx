@@ -1,71 +1,102 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaStar } from "react-icons/fa";
-import { Checkbox, FormControlLabel } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { Checkbox } from "@mui/material";
 
-function SearchBar() {
+function SearchBar({ onSearch, query }) {
   const petTypeList = ["Dog", "Cat", "Bird", "Rabbit"];
   const ratingList = [5, 4, 3, 2, 1];
   const experienceList = ["", "0-2 Years", "3-5 Years", "5+ Years"];
+  // console.log(query);
 
-  const [search, setSearch] = useState({
-    keyword: "",
-    rating: [],
-    type: [],
-    experience: "",
+  const [input, setInput] = useState({
+    keyword: query?.keyword ?? "",
+    rating: query?.rating ?? "",
+    type: query?.type ?? "",
+    experience: query?.experience ?? "",
   });
-  const router = useRouter();
 
   function handleSearch() {
-    router.push(
-      `/search?keyword=${search?.keyword ?? ""}&type=${
-        search?.type ?? ""
-      }&rating=${search?.rating ?? ""}&experience=${search.experience ?? ""}`
-    );
+    if (typeof onSearch === "function") {
+      onSearch(input); // ตรวจสอบว่า onSearch เป็นฟังก์ชันก่อนเรียก
+    } else {
+      console.error("onSearch is not a function");
+    }
+  }
+
+  function handleClear() {
+    const clearedInput = {
+      keyword: "",
+      rating: [],
+      type: [],
+      experience: "",
+    };
+    setInput(clearedInput); // Reset input state to cleared values
+    onSearch(clearedInput); // Immediately send cleared values to parent or search/page.jsx
   }
 
   function handleCheckboxChange(e, name) {
     const isChecked = e.target.checked;
 
-    setSearch((prevSearch) => {
+    setInput((prevInput) => {
       if (isChecked) {
         // Add the selected pet type to the array
-        return { ...prevSearch, type: [...prevSearch.type, name] };
+        return { ...prevInput, type: [...prevInput.type, name] };
       } else {
         // Remove the unselected pet type from the array
         return {
-          ...prevSearch,
-          type: prevSearch.type.filter((pet) => pet !== name),
+          ...prevInput,
+          type: prevInput.type.filter((pet) => pet !== name),
         };
       }
     });
   }
 
   function handleToggle(num) {
-    setSearch((prevSearch) => {
-      const updatedRatings = prevSearch.rating.includes(num)
-        ? prevSearch.rating.filter((rating) => rating !== num) // Remove selected rating
-        : [...prevSearch.rating, num]; // Add selected rating
+    setInput((prevInput) => {
+      const updatedRatings = prevInput.rating.includes(num)
+        ? prevInput.rating.filter((rating) => rating !== num) // Remove selected rating
+        : [...prevInput.rating, num]; // Add selected rating
 
       return {
-        ...prevSearch,
+        ...prevInput,
         rating: updatedRatings,
       };
     });
   }
 
+  useEffect(() => {
+    // console.log(input);
+    // onSearch(input);
+  }, [input, handleClear]);
+
   return (
-    <section className="w-full flex justify-center sm:py-12">
-      <div className="w-[343px] flex flex-col items-center rounded-2xl shadow-[0px_4px_20px_-15px_rgba(0,0,0,0.4)] sm:w-[80%] lg:w-[60%] xl:w-[1064px]">
-        <div className="bg-[#F6F6F9] flex flex-col gap-2 p-4 w-full rounded-t-2xl lg:flex-row lg:items-center xl:p-6">
+    <section className="w-full flex justify-center lg:py-10 max-w-[375px]">
+      <div className="w-full flex flex-col items-center rounded-2xl shadow-[0px_4px_20px_-15px_rgba(0,0,0,0.4)] ">
+        <div className="bg-white w-full flex flex-col gap-1 p-4 max-lg:hidden rounded-t-2xl">
+          <label className="text-4 font-bold leading-6 text-gray-600">
+            Search
+          </label>
+          <input
+            className="w-full p-[12px_16px] text-black rounded-lg bg-white border border-gray-200 focus:border-orange-400 outline-0"
+            type="text"
+            value={input.keyword}
+            onChange={(e) =>
+              setInput((prevInput) => ({
+                ...prevInput,
+                keyword: e.target.value,
+              }))
+            }
+          />
+        </div>
+        <div className="bg-[#F6F6F9] flex flex-col gap-2 px-4 max-lg:py-4 w-full lg:bg-white">
           <p className="text-4 font-bold leading-6 text-gray-600">Pet Type:</p>
           <div className="flex gap-4">
             {petTypeList.map((name, index) => {
               return (
                 <div className="flex gap-2 items-center" key={index}>
                   <Checkbox
-                    checked={search.type.includes(name)}
+                    checked={input.type.includes(name)}
                     onChange={(event) => handleCheckboxChange(event, name)}
                     sx={{
                       color: "#DCDFED",
@@ -87,29 +118,27 @@ function SearchBar() {
                   >
                     {name}
                   </label>
-                  {/* }
-                  /> */}
                 </div>
               );
             })}
           </div>
         </div>
-        <div className="p-4 flex flex-col gap-6 w-full lg:flex-row lg:flex-wrap xl:justify-between xl:p-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="p-4 flex flex-col gap-6 w-full lg:rounded-b-2xl lg:flex-wrap xl:justify-between bg-white">
+          <div className="flex flex-col gap-3 ">
             <p className="text-4 font-bold leading-6 text-gray-600">Rating:</p>
             <div className="flex gap-2 flex-wrap">
               {ratingList.map((num, index) => {
                 return (
                   <div
                     className={`flex gap-1 items-center border rounded-md p-[4px_8px] cursor-pointer ${
-                      search.rating.includes(num) ? "border-orange-500" : ""
+                      input.rating.includes(num) ? "border-orange-500" : ""
                     }`}
                     onClick={() => handleToggle(num)}
                     key={index}
                   >
                     <p
                       className={` ${
-                        search.rating.includes(num)
+                        input.rating.includes(num)
                           ? "text-orange-500"
                           : "text-gray-400"
                       }`}
@@ -130,15 +159,15 @@ function SearchBar() {
             </div>
           </div>
           {/* <div className="flex flex-col gap-3 lg:flex-row lg:gap-10"> */}
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="flex flex-col gap-3 ">
             <p className="text-4 font-bold leading-6 text-gray-600">
               Experience:
             </p>
             <select
               className="bg-white text-gray-500 rounded-md border border-gray-200 p-[12px_16px]"
-              value={search.experience}
+              value={input.experience}
               onChange={(e) =>
-                setSearch((prevInput) => ({
+                setInput((prevInput) => ({
                   ...prevInput,
                   experience: e.target.value,
                 }))
@@ -153,14 +182,21 @@ function SearchBar() {
               })}
             </select>
           </div>
-          <button
-            className="bg-orange-500 text-white p-[12px_24px] rounded-[99px] hover:bg-orange-400 active:bg-orange-600"
-            onClick={handleSearch}
-          >
-            Search
-          </button>
+          <div className=" flex justify-between gap-2">
+            <button
+              className="bg-orange-100 text-orange-500 font-bold p-[12px_24px] rounded-[99px] hover:text-orange-400 active:text-orange-600 grow"
+              onClick={handleClear}
+            >
+              Clear
+            </button>
+            <button
+              className="bg-orange-500 text-white font-bold p-[12px_24px] rounded-[99px] hover:bg-orange-400 active:bg-orange-600 grow"
+              onClick={handleSearch}
+            >
+              Search
+            </button>
+          </div>
         </div>
-        {/* </div> */}
       </div>
     </section>
   );
