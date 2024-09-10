@@ -11,8 +11,10 @@ import axios from "axios";
 import Pagination from "@mui/material/Pagination";
 import { BeatLoader } from "react-spinners";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 function SearchPage() {
+  const { data: session, status } = useSession();
   const searchParams = useSearchParams();
   const petType = searchParams.get("type");
   const keyword = searchParams.get("keyword");
@@ -72,7 +74,7 @@ function SearchPage() {
   };
 
   return (
-    <MainLayout>
+    <MainLayout session={session}>
       <section className="w-full h-full bg-gray-100 flex flex-col items-center lg:p-[40px_80px]">
         <div className="flex justify-between items-center w-full  max-lg:hidden lg:px-20 max-w-[1440px]">
           <h4 className="text-head4 text-gray-600">Search For Pet Sitter</h4>

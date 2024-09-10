@@ -103,7 +103,7 @@ function Navbar({ session }) {
               </button>
             </div>
             <Link
-              href=""
+              href="/search"
               className="bg-orange-500 text-white rounded-full text-[16px] font-bold lg:p-[16px_24px] p-[16px_20px] hover:bg-orange-400 active:bg-orange-600"
             >
               Find A Pet Sitter
