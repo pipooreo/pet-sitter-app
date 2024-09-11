@@ -7,7 +7,7 @@ function HomeFooter() {
   return (
     <footer className="flex flex-col items-center justify-center md:p-[80px]">
       <div className="bg-yellow-100 flex flex-col items-center justify-center h-[469px] xl:w-[1280px] md:rounded-2xl w-full relative overflow-hidden">
-        <div className="flex flex-col gap-10 w-[344px] md:w-[457px] items-center z-9">
+        <div className="flex flex-col gap-10 w-[344px] md:w-[457px] items-center z-10">
           <h1 className="text-black text-head2 text-center md:text-head1">
             Perfect Pet Sitter For Your Pet
           </h1>

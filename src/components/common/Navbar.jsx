@@ -39,7 +39,7 @@ function Navbar({ session }) {
   };
 
   return (
-    <nav className="w-full h-[80px] p-[12px_20px] flex justify-center items-center text-center lg:p-[0px_80px] sticky top-0 z-10 bg-white/80">
+    <nav className="w-full h-[80px] p-[12px_20px] flex justify-center items-center text-center lg:p-[0px_80px] sticky top-0 z-20 bg-white/80">
       <div className="flex justify-between items-center text-center max-w-[1440px] p- w-full">
         <img
           src="/logo-black.png"
