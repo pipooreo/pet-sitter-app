@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { SlLocationPin } from "react-icons/sl";
 import { PiPawPrintDuotone } from "react-icons/pi";
+import { AiOutlineUser } from "react-icons/ai";
 
 function SitterCard({ data }) {
   //   console.log(sitter.id);
@@ -16,19 +17,26 @@ function SitterCard({ data }) {
     >
       <div className="rounded-2xl p-4 flex flex-col gap-4 xl:flex-row lg:gap-10 lg:w-full">
         <img
-          src=""
-          className="w-[311px] h-[100px] rounded-lg lg:w-[245px] lg:h-[184px]"
+          src={sitter.gallery[1] || sitter.gallery[0]}
+          className="w-[311px] h-[100px] rounded-lg lg:w-[245px] lg:h-[184px]  object-cover"
           // alt="sitter"
         />
         <div className="flex flex-col gap-2 lg:gap-6 lg:w-full">
           <div className="flex gap-4 justify-between w-full">
             <div className="flex gap-4 ">
-              <img
-                src=""
-                className="w-[36px] h-[36px] lg:w-[64px] lg:h-[64px] rounded-full"
-                //   alt="profile"
-              />
-              <div className="flex flex-col ">
+              {sitter.profile_image ? (
+                <img
+                  src={sitter.profile_image}
+                  className="w-[36px] h-[36px] lg:w-[64px] lg:h-[64px] rounded-full"
+                  //   alt="profile"
+                />
+              ) : (
+                <div className="w-[36px] h-[36px] lg:w-[64px] lg:h-[64px] rounded-full flex justify-center items-center border ">
+                  <AiOutlineUser className="w-[36px] h-[36px] text-gray-200" />
+                </div>
+              )}
+
+              <div className="flex flex-col flex-1">
                 <h3 className="text-black text-[18px] leading-6 font-bold lg:text-head3  ">
                   {sitter.trade_name}
                 </h3>
