@@ -2,19 +2,26 @@
 import React, { useEffect, useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { Checkbox } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 function SearchBar({ onSearch, query }) {
   const petTypeList = ["Dog", "Cat", "Bird", "Rabbit"];
   const ratingList = [5, 4, 3, 2, 1];
   const experienceList = ["", "0-2 Years", "3-5 Years", "5+ Years"];
   // console.log(query);
+  if (query?.type.includes(",")) {
+    query.type = query.type.split(",");
+    console.log(query.type);
+  }
 
   const [input, setInput] = useState({
     keyword: query?.keyword ?? "",
-    rating: query?.rating ?? "",
-    type: query?.type ?? "",
+    rating: query?.rating ?? [],
+    type: Array.isArray(query?.type) ? query?.type : [query?.type],
     experience: query?.experience ?? "",
   });
+
+  const router = useRouter();
 
   function handleSearch() {
     if (typeof onSearch === "function") {
@@ -33,6 +40,7 @@ function SearchBar({ onSearch, query }) {
     };
     setInput(clearedInput); // Reset input state to cleared values
     onSearch(clearedInput); // Immediately send cleared values to parent or search/page.jsx
+    router.push("/search");
   }
 
   function handleCheckboxChange(e, name) {
@@ -164,7 +172,8 @@ function SearchBar({ onSearch, query }) {
               Experience:
             </p>
             <select
-              className="bg-white text-gray-500 rounded-md border border-gray-200 p-[12px_16px]"
+              // className="bg-white text-gray-500 rounded-md border border-gray-200 p-[12px_16px] active:border-orange-400"
+              className={`bg-white text-gray-500 rounded-md border focus:outline-none focus:border-orange-400 p-[12px_16px] `}
               value={input.experience}
               onChange={(e) =>
                 setInput((prevInput) => ({

@@ -2,16 +2,16 @@
 import { Suspense } from "react";
 import MainLayout from "@/components/layouts/MainLayout";
 import React, { useEffect, useState } from "react";
-import { FaStar } from "react-icons/fa";
-import { SlLocationPin } from "react-icons/sl";
-import { FiList } from "react-icons/fi";
-import { TbMap } from "react-icons/tb";
 import SearchBar from "@/components/search/SearchBar";
 import axios from "axios";
 import Pagination from "@mui/material/Pagination";
 import { BeatLoader } from "react-spinners";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import SitterCard from "@/components/search/SitterCard";
+import NoResult from "@/components/search/NoResult";
+import HeaderSearchDesktop from "@/components/search/HeaderSearchDesktop";
+import HeaderSearchMobile from "@/components/search/HeaderSearchMobile";
 
 function SearchPage() {
   const { data: session, status } = useSession();
@@ -29,14 +29,13 @@ function SearchPage() {
   const [query, setQuery] = useState({
     keyword: keyword,
     rating: rating,
-    type: petType,
+    type: petType ?? [],
     experience: experience,
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   async function getSitter(params) {
-    setLoading(true);
     try {
       let result = await axios.get(
         `/api/search?keyword=${query?.keyword ?? ""}&type=${
@@ -57,7 +56,13 @@ function SearchPage() {
     setQuery(searchTerm); // อัปเดต state ใน SearchPage
   };
 
+  function handleResult(list, map) {
+    setIsList(list);
+    setIsMap(map);
+  }
+
   useEffect(() => {
+    setLoading(true);
     getSitter();
     // console.log(query);
   }, [query?.keyword, query?.type, query?.rating, query?.experience]);
@@ -76,79 +81,11 @@ function SearchPage() {
   return (
     <MainLayout session={session}>
       <section className="w-full h-full bg-gray-100 flex flex-col items-center lg:p-[40px_80px]">
-        <div className="flex justify-between items-center w-full  max-lg:hidden lg:px-20 max-w-[1440px]">
-          <h4 className="text-head4 text-gray-600">Search For Pet Sitter</h4>
-          <div className="flex gap-3 justify-center ">
-            <button
-              className={`border grow flex p-[8px_12px] justify-center rounded-lg items-center gap-2 ${
-                isList
-                  ? "border-orange-500 text-orange-500"
-                  : "border-gray-300  text-gray-300"
-              }`}
-              onClick={() => {
-                setIsList(true);
-                setIsMap(false);
-              }}
-            >
-              <FiList className="w-[24px] h-[24px]" />
-              List
-            </button>
-            <button
-              className={`border grow flex rounded-lg p-[8px_12px] justify-center items-center gap-2 ${
-                isMap
-                  ? "border-orange-500 text-orange-500"
-                  : "border-gray-300  text-gray-300 "
-              }`}
-              onClick={() => {
-                setIsList(false);
-                setIsMap(true);
-              }}
-            >
-              <TbMap className="w-[24px] h-[24px]" />
-              Map
-            </button>
-          </div>
-        </div>
+        <HeaderSearchDesktop onResult={handleResult} />
         <div className="max-w-[1440px] flex flex-col items-center lg:flex-row lg:items-start lg:w-full lg:justify-between lg:px-20 lg:gap-6 ">
           <SearchBar onSearch={handleSearch} query={query} />
           <div className="flex flex-col p-[40px_16px] gap-6 items-center justify-center w-full lg:py-10 lg:px-0 max-w-[848px] ">
-            <div className="flex flex-col gap-3 items-center w-full lg:hidden">
-              <div className="flex flex-col gap-3 items-center w-full ">
-                <h4 className="text-head4 text-gray-600">
-                  Search For Pet Sitter
-                </h4>
-                <div className="flex gap-3 justify-center w-full">
-                  <button
-                    className={`border grow flex p-[8px_12px] justify-center rounded-lg items-center gap-2 ${
-                      isList
-                        ? "border-orange-500 text-orange-500"
-                        : "border-gray-300  text-gray-300"
-                    }`}
-                    onClick={() => {
-                      setIsList(true);
-                      setIsMap(false);
-                    }}
-                  >
-                    <FiList className="w-[24px] h-[24px]" />
-                    List
-                  </button>
-                  <button
-                    className={`border grow flex rounded-lg p-[8px_12px] justify-center items-center gap-2 ${
-                      isMap
-                        ? "border-orange-500 text-orange-500"
-                        : "border-gray-300  text-gray-300 "
-                    }`}
-                    onClick={() => {
-                      setIsList(false);
-                      setIsMap(true);
-                    }}
-                  >
-                    <TbMap className="w-[24px] h-[24px]" />
-                    Map
-                  </button>
-                </div>
-              </div>
-            </div>
+            <HeaderSearchMobile onResult={handleResult} />
             {isList && (
               <div className="flex flex-col gap-4 items-center w-full">
                 {loading && (
@@ -156,94 +93,15 @@ function SearchPage() {
                     size={15}
                     color={"#FF7037"}
                     margin={2}
-                    className="flex justify-center items-center h-screen"
+                    className="flex justify-center mt-[250px] h-screen"
                   />
                 )}
                 {!loading &&
+                  paginatedSearch.length > 0 &&
                   paginatedSearch.map((sitter) => {
-                    return (
-                      <div
-                        className="flex flex-col gap-4 items-center rounded-2xl bg-white w-full"
-                        key={sitter.id}
-                      >
-                        <div className="rounded-2xl p-4 flex flex-col gap-4 xl:flex-row lg:gap-10 lg:w-full ">
-                          <img
-                            src=""
-                            className="w-[311px] h-[100px] rounded-lg lg:w-[245px] lg:h-[184px]"
-                          />
-                          <div className="flex flex-col gap-2 lg:gap-6 lg:w-full">
-                            <div className="flex gap-4 justify-between w-full">
-                              <div className="flex gap-4 ">
-                                <img
-                                  src=""
-                                  className="w-[36px] h-[36px] lg:w-[64px] lg:h-[64px] rounded-full"
-                                />
-                                <div className="flex flex-col ">
-                                  <h3 className="text-black text-[18px] leading-6 font-bold lg:text-head3  ">
-                                    {sitter.trade_name}
-                                  </h3>
-                                  <p className="text-body3 lg:text-body1 text-black">
-                                    By {sitter.name}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex gap-[2px] p-[6px] rounded-lg">
-                                {Array.from({ length: 5 }).map((_, index) => {
-                                  return (
-                                    <FaStar
-                                      className="text-green-500 w-[12px] h-[12px] lg:w-[20px] lg:h-[20px]"
-                                      key={index}
-                                    />
-                                  );
-                                })}
-                              </div>
-                            </div>
-                            <div className="flex gap-[6px] text-gray-400 items-center">
-                              <SlLocationPin className="w-[16px] h-[16px] lg:w-[24px] lg:h-[24px]" />
-                              <p className="text-body3 lg:text-body2">
-                                Senanikom, Bangkok
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              {sitter.pet_type.map((item, index) => {
-                                if (item) {
-                                  return item === "Dog" ? (
-                                    <div
-                                      className="rounded-[99px] p-[4px_16px] border border-green-500 bg-green-100 text-green-500"
-                                      key={index}
-                                    >
-                                      {item}
-                                    </div>
-                                  ) : item === "Cat" ? (
-                                    <div
-                                      className="rounded-[99px] p-[4px_16px] border border-pink-500 bg-pink-100 text-pink-500"
-                                      key={index}
-                                    >
-                                      {item}
-                                    </div>
-                                  ) : item === "Bird" ? (
-                                    <div
-                                      className="rounded-[99px] p-[4px_16px] border border-blue-500 bg-blue-100 text-blue-500"
-                                      key={index}
-                                    >
-                                      {item}
-                                    </div>
-                                  ) : (
-                                    <div
-                                      className="rounded-[99px] p-[4px_16px] border border-orange-500 bg-orange-100 text-orange-500"
-                                      key={index}
-                                    >
-                                      {item}
-                                    </div>
-                                  );
-                                }
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
+                    return <SitterCard data={sitter} key={sitter.id} />;
                   })}
+                {!loading && paginatedSearch.length < 1 && <NoResult />}
               </div>
             )}
           </div>

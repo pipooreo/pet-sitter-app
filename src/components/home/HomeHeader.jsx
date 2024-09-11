@@ -4,12 +4,12 @@ function HomeHeader() {
   return (
     <header className="relative max-sm:h-[565px] sm:h-[865px] lg:h-[500px] border-red  overflow-hidden">
       <div className="flex flex-col items-center gap-6 sm:gap-8 text-center sm:mt-[30px]">
-        <h1 className="mt-12 text-[48px] leading-[56px] font-black sm:text-display text-black z-10">
+        <h1 className="mt-12 text-[48px] leading-[56px] font-black sm:text-display text-black z-9">
           Pet Sitter<span className="text-orange-500">,</span>
           <br /> Perfect<span className="text-blue-500">,</span>
           <br /> For Your Pet<span className="text-yellow-500">.</span>
         </h1>
-        <p className="text-head4 sm:text-head3 text-gray-400 z-10">
+        <p className="text-head4 sm:text-head3 text-gray-400 z-9">
           Find your perfect pet sitter with us.
         </p>
       </div>
