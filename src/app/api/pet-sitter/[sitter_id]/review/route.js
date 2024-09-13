@@ -6,7 +6,7 @@ export async function GET(request, { params }) {
 
   try {
     const { rows } = await connectionPool.query(
-      `select user, review, rating, target_sitter from ratings_reviews where target_sitter = $1`,
+      `select user, created_at, review, rating, target_sitter from ratings_reviews where target_sitter = $1`,
       [sitter_review]
     );
     return NextResponse.json(rows);

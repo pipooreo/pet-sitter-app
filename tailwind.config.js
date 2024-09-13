@@ -89,6 +89,7 @@ module.exports = {
         400: "#7B7E8F",
         500: "#5B5D6F",
         600: "#3A3B46",
+        cat: "#FAFAFB"
       },
       orange: {
         100: "#FFF1EC",
