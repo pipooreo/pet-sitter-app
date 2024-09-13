@@ -22,68 +22,76 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        rememberMe: { label: "Remember me", type: "checkbox" }, // Only here
+        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
-        const user = await authorizeUser(credentials, "owner");
+        const rememberMe = credentials.rememberMe === "true" ? true : false;
+        console.log("credentailllllllllllll", credentials);
+        let user = await authorizeUser(credentials, "owner");
         if (user) {
-          user.rememberMe = credentials.rememberMe; // Assign rememberMe only for owner/admin
+          user.rememberMe = credentials.rememberMe;
+          console.log("user with rememberMe:", user);
           return user;
         }
-        return authorizeUser(credentials, "admin");
+        user = await authorizeUser(credentials, "admin");
+        if (user) {
+          user.rememberMe = rememberMe; // Set rememberMe for admin as well
+        }
+        return user;
       },
     }),
   ],
   callbacks: {
     async signIn({ user }) {
-      return !!user; // Sign in only if the user exists
+      return user;
     },
     async jwt({ token, user }) {
       if (user) {
+        console.log("user &&&&&&&&&&", user);
         token.id = user.id;
         token.role = user.role;
-
-        if (user.rememberMe !== undefined) {
-          token.rememberMe = user.rememberMe; // Only if rememberMe is present
+        token.rememberMe = user.rememberMe;
+        console.log("rememememmemememeber", token);
+        const now = Math.floor(Date.now() / 1000);
+        console.log("toekm --------------", token);
+        if (user.role === "sitter") {
+          token.expires = now + 30 * 24 * 60 * 60; // 1 month for sitters
+        } else {
+          token.expires =
+            now +
+            (token.rememberMe === true ? 7 * 24 * 60 * 60 : 1 * 24 * 60 * 60); // 7 days or 1 days for admin/owner
         }
       }
 
-      // Adjust maxAge dynamically based on rememberMe, only for owner-admin
-      if (token.rememberMe === true) {
-        token.maxAge = 7 * 24 * 60 * 60; // 7 days
-      } else {
-        token.maxAge = 30; // 30 minutes
+      const now = Math.floor(Date.now() / 1000);
+      if (token.expires < now) {
+        return null;
       }
 
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.maxAge = token.maxAge;
-        session.expires = new Date(
-          Date.now() + session.maxAge * 1000
-        ).toISOString();
+        const now = Math.floor(Date.now() / 1000);
+        if (now > token.expires) {
+          return null;
+        }
+
+        session.user = {
+          id: token.id,
+          email: token.email,
+          role: token.role,
+        };
+        session.expires = new Date(token.expires * 1000).toISOString();
       }
+      console.log("session JA=============", session);
       return session;
     },
   },
-  pages: {
-    signIn: (context) => {
-      if (context.providerId === "sitter-login") {
-        return "/login/sitter";
-      }
-      return "/login"; // Default login page for user and admin
-    },
-    error: "/auth/error",
-  },
-  debug: process.env.NODE_ENV === "development",
+  pages: {},
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 2 * 60 * 60, // Default maxAge set to 30 minutes
-    // updateAge: 60 * 60, // Optional: specify interval (in seconds) for rolling sessions
   },
 };
 
@@ -99,7 +107,6 @@ async function authorizeUser(credentials, role) {
     if (user.rows.length === 0) {
       return null;
     }
-
     const isValidPassword = await bcrypt.compare(
       credentials.password,
       user.rows[0].password
@@ -114,7 +121,6 @@ async function authorizeUser(credentials, role) {
       name: user.rows[0].name,
       email: user.rows[0].email,
       role: user.rows[0].role,
-      // No need to return rememberMe for sitter
     };
   } catch (error) {
     console.error(`Error in authorize function for ${role}:`, error);

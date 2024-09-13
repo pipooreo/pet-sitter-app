@@ -7,7 +7,6 @@ import * as Yup from "yup";
 import { signIn, useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import { BeatLoader } from "react-spinners";
 const LoginPage = () => {
   const router = useRouter();
@@ -42,16 +41,15 @@ const LoginPage = () => {
     password: "",
   };
 
-  const handleBackToHome = () => {
-    router.push("/");
-  };
+  // const handleBackToHome = () => {
+  //   router.push("/");
+  // };
 
   const validationSchema = Yup.object({
     email: Yup.string()
       .email("Please enter a valid email (email@company.com)")
       .required("Please enter your email"),
     password: Yup.string().required("Please enter your password"),
-    // remember: yup.boolean(),
   });
 
   const handleRememberMeChange = () => {
@@ -71,23 +69,19 @@ const LoginPage = () => {
         email: values.email,
         password: values.password,
         rememberMe: rememberMe, // Pass rememberMe flag
-        callbackUrl: "/admin", // Optionally add callback URL here
       });
       if (result.error) {
         toast.error("Email or Password is wrong");
         setButtonLoading(false);
       } else if (result.ok) {
-        // Update cookie logic if needed
         document.cookie = `rememberMe=${rememberMe}; path=/`;
         setIsLoading(true);
         toast.success("Login successful!");
         router.replace(result.url || "/admin");
       }
     } catch (error) {
-      // setIsLoading(false);
       toast.error("Email or Password is wrong");
       setButtonLoading(false);
-      // setFieldError("password", "Email or Password is wrong");
     }
   };
 
