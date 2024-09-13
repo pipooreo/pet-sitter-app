@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectionPool from '@/lib/db';
 import bcrypt from 'bcrypt';
-
+import { authOptions } from '../[...nextauth]/route';
 function normalizePhoneNumber(phone) {
   if (phone.startsWith('+66')) {
     return phone.replace('+66', '0');

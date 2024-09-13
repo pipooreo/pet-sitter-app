@@ -22,12 +22,14 @@ export const authOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
-        rememberMe: { label: "Remember me", type: "checkbox" }, // Only here
+        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
-        const user = await authorizeUser(credentials, "owner");
+        console.log("credentailllllllllllll", credentials);
+        let user = await authorizeUser(credentials, "owner");
         if (user) {
-          user.rememberMe = credentials.rememberMe; // Assign rememberMe only for owner/admin
+          user.rememberMe = credentials.rememberMe;
+          console.log("kuyyyyyyyyyyy", user);
           return user;
         }
         return authorizeUser(credentials, "admin");
@@ -40,45 +42,58 @@ export const authOptions = {
     },
     async jwt({ token, user }) {
       if (user) {
+        console.log("user &&&&&&&&&&", user);
         token.id = user.id;
         token.role = user.role;
+        token.rememberMe = user.rememberMe;
 
-        if (user.rememberMe !== undefined) {
-          token.rememberMe = user.rememberMe; // Only if rememberMe is present
+        const now = Math.floor(Date.now() / 1000);
+        console.log("toekm --------------", token);
+        if (user.role === "sitter") {
+          token.expires = now + 30 * 24 * 60 * 60; // 1 month for sitters
+        } else {
+          token.expires =
+            now + (token.rememberMe === "true" ? 30 : 1 * 24 * 60 * 620); // 1 day or 20 seconds for admin/owner
         }
       }
 
-      // Adjust maxAge dynamically based on rememberMe, only for owner-admin
-      if (token.rememberMe === true) {
-        token.maxAge = 7 * 24 * 60 * 60; // 7 days
-      } else {
-        token.maxAge = 30; // 30 minutes
+      // Remove the token after it expires
+      const now = Math.floor(Date.now() / 1000);
+      if (token.expires < now) {
+        return null; // Expired token
       }
 
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.maxAge = token.maxAge;
-        session.expires = new Date(
-          Date.now() + session.maxAge * 1000
-        ).toISOString();
+        const now = Math.floor(Date.now() / 1000); // Current time in seconds
+        if (now > token.expires) {
+          return null; // Session should be considered invalid
+        }
+
+        session.user = {
+          id: token.id,
+          email: token.email,
+          role: token.role,
+        };
+        session.expires = new Date(token.expires * 1000).toISOString();
       }
+      console.log("session JA=============", session);
       return session;
     },
   },
   pages: {
-    signIn: (context) => {
-      if (context.providerId === "sitter-login") {
-        return "/login/sitter";
-      }
-      return "/login"; // Default login page for user and admin
-    },
-    error: "/auth/error",
+    // signIn: (context) => {
+    //   if (context.providerId === "sitter-login") {
+    //     console.log("context**************", context);
+    //     // return "/login/sitter";
+    //   }
+    //   // return "/login"; // Default login page for user and admin
+    // },
+    // error: "/auth/error",
   },
-  debug: process.env.NODE_ENV === "development",
+  // debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",

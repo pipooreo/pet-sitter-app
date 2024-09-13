@@ -71,7 +71,7 @@ const LoginPage = () => {
         email: values.email,
         password: values.password,
         rememberMe: rememberMe, // Pass rememberMe flag
-        callbackUrl: "/admin", // Optionally add callback URL here
+        // callbackUrl: "/admin", // Optionally add callback URL here
       });
       if (result.error) {
         toast.error("Email or Password is wrong");
@@ -82,6 +82,7 @@ const LoginPage = () => {
         setIsLoading(true);
         toast.success("Login successful!");
         router.replace(result.url || "/admin");
+        // router.replace("/admin");
       }
     } catch (error) {
       // setIsLoading(false);
