@@ -20,7 +20,7 @@ export default function Home() {
   }
   return (
     <MainLayout session={session}>
-      <main className="w-full h-full xs:w-xs">
+      <main className="w-full min-h-screen xs:w-xs">
         <HomeHeader />
         <SearchBar />
         <Activity />

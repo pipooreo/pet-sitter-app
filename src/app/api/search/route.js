@@ -11,10 +11,13 @@ export async function GET(req) {
   // console.log(keyword, rating, type, experience);
 
   //   console.log(searchParam);
-  let queryData = `select users.id, name, trade_name, profile_image, array_agg(distinct sitter_galleries.img) as gallery, array_agg(distinct type::text) as pet_type,array_agg(distinct service) as service, experience from users 
+  let queryData = `select users.id, name, trade_name, profile_image, array_agg(distinct sitter_galleries.img) as gallery, 
+        array_agg(distinct type::text) as pet_type,array_agg(distinct service) as service, experience, 
+        CONCAT_WS(', ', address_detail, district, subdistrict, province, postcode) AS address from users 
         left join pet_sitter_profiles on users.id = pet_sitter_profiles.user_id 
         left join pet_types on pet_sitter_profiles.id = pet_types.pet_sitter_profile_id
         left join sitter_galleries on pet_sitter_profiles.user_id = sitter_galleries.pet_sitter_profile_id
+        left join pet_sitter_addresses on pet_sitter_profiles.id = pet_sitter_addresses.pet_sitter_profile_id
         where role = 'sitter'`;
 
   let queryParams = [];
@@ -57,7 +60,7 @@ export async function GET(req) {
     }
   }
   queryData += `
-  group by users.id, name, trade_name, profile_image, experience`;
+  group by users.id, name, trade_name, profile_image, experience, address_detail, district, subdistrict, province, postcode`;
   if (type) {
     // console.log(type);
     let typeArray = [];

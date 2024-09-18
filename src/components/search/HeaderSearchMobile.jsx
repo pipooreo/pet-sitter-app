@@ -20,7 +20,7 @@ function HeaderSearchMobile({ onResult }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 items-center w-full lg:hidden">
+    <div className="flex flex-col gap-3 items-center w-full p-[20px_16px_10px_16px] lg:hidden">
       <div className="flex flex-col gap-3 items-center w-full ">
         <h4 className="text-head4 text-gray-600">Search For Pet Sitter</h4>
         <div className="flex gap-3 justify-center w-full">

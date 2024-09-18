@@ -10,18 +10,28 @@ function SitterCard({ data }) {
   //   console.log(sitter.id);
   const [sitter, setSitter] = useState(data);
 
+  function splitAddress(address) {
+    let newAddress = address.split(",");
+    // console.log(newAddress);
+    if (address) {
+      return `${newAddress[2]}, ${newAddress[3]}`;
+    } else {
+      return "";
+    }
+  }
+
   return (
     <div
       className="flex flex-col gap-4 items-center rounded-2xl bg-white w-full"
       key={sitter.id}
     >
-      <div className="rounded-2xl p-4 flex flex-col gap-4 xl:flex-row lg:gap-10 lg:w-full">
+      <div className="rounded-2xl p-4 flex flex-col gap-4 xl:flex-row lg:gap-10 lg:w-full items-center">
         <img
           src={sitter.gallery[1] || sitter.gallery[0]}
           className="w-[311px] h-[100px] rounded-lg lg:w-[245px] lg:h-[184px]  object-cover"
           // alt="sitter"
         />
-        <div className="flex flex-col gap-2 lg:gap-6 lg:w-full">
+        <div className="flex flex-col gap-2 lg:gap-6 lg:w-full grow">
           <div className="flex gap-4 justify-between w-full">
             <div className="flex gap-4 ">
               {sitter.profile_image ? (
@@ -36,8 +46,8 @@ function SitterCard({ data }) {
                 </div>
               )}
 
-              <div className="flex flex-col flex-1">
-                <h3 className="text-black text-[18px] leading-6 font-bold lg:text-head3  ">
+              <div className="flex flex-col flex-1 flex-wrap">
+                <h3 className="text-black text-[18px] leading-6 font-bold lg:text-head3 ">
                   {sitter.trade_name}
                 </h3>
                 <p className="text-body3 lg:text-body1 text-black">
@@ -56,12 +66,15 @@ function SitterCard({ data }) {
               })}
             </div>
           </div>
-          <div className="flex justify-between text-gray-400 items-center">
-            <div className="flex gap-[6px] text-gray-400 items-center">
+          <div className="flex justify-between text-gray-400 items-start">
+            <div className="flex gap-[6px] text-gray-400 items-start ">
               <SlLocationPin className="w-[16px] h-[16px] lg:w-[24px] lg:h-[24px]" />
-              <p className="text-body3 lg:text-body2">Senanikom, Bangkok</p>
+              <p className="text-body3 lg:text-body2 max-w-[300px]">
+                {splitAddress(sitter.address)}
+                {/* {sitter.address} */}
+              </p>
             </div>
-            <div className="flex gap-[6px] text-gray-400 items-center mr-2">
+            <div className="flex gap-[6px] text-gray-400 items-center mr-2 ">
               <PiPawPrintDuotone className="w-[16px] h-[16px] lg:w-[24px] lg:h-[24px]" />
               <p className="text-body3 lg:text-body2">
                 {sitter.experience} Years
