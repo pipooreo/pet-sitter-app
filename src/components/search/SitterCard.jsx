@@ -29,7 +29,7 @@ function SitterCard({ data }) {
         <img
           src={sitter.gallery[1] || sitter.gallery[0]}
           className="w-[311px] h-[100px] rounded-lg lg:w-[245px] lg:h-[184px]  object-cover"
-          // alt="sitter"
+          alt="pet-sitter image"
         />
         <div className="flex flex-col gap-2 lg:gap-6 lg:w-full grow">
           <div className="flex gap-4 justify-between w-full">
@@ -38,7 +38,7 @@ function SitterCard({ data }) {
                 <img
                   src={sitter.profile_image}
                   className="w-[36px] h-[36px] lg:w-[64px] lg:h-[64px] rounded-full"
-                  //   alt="profile"
+                  alt="profile"
                 />
               ) : (
                 <div className="w-[36px] h-[36px] lg:w-[64px] lg:h-[64px] rounded-full flex justify-center items-center border ">
@@ -84,30 +84,17 @@ function SitterCard({ data }) {
           <div className="flex gap-2">
             {sitter.pet_type.map((item, index) => {
               if (item) {
-                return item === "Dog" ? (
+                return (
                   <div
-                    className="rounded-[99px] p-[4px_16px] border border-green-500 bg-green-100 text-green-500"
-                    key={index}
-                  >
-                    {item}
-                  </div>
-                ) : item === "Cat" ? (
-                  <div
-                    className="rounded-[99px] p-[4px_16px] border border-pink-500 bg-pink-100 text-pink-500"
-                    key={index}
-                  >
-                    {item}
-                  </div>
-                ) : item === "Bird" ? (
-                  <div
-                    className="rounded-[99px] p-[4px_16px] border border-blue-500 bg-blue-100 text-blue-500"
-                    key={index}
-                  >
-                    {item}
-                  </div>
-                ) : (
-                  <div
-                    className="rounded-[99px] p-[4px_16px] border border-orange-500 bg-orange-100 text-orange-500"
+                    className={`rounded-[99px] p-[4px_16px] border ${
+                      item === "Dog"
+                        ? "border-green-500 bg-green-100 text-green-500"
+                        : item === "Cat"
+                        ? "border-pink-500 bg-pink-100 text-pink-500"
+                        : item === "Bird"
+                        ? "border-blue-500 bg-blue-100 text-blue-500"
+                        : "border-orange-500 bg-orange-100 text-orange-500"
+                    } `}
                     key={index}
                   >
                     {item}
