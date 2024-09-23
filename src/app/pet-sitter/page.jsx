@@ -35,10 +35,20 @@ function Sitterpage() {
   }
 
   return (
-    <div>
-      <Navbar session={session} />
-      <button onClick={handleSignOut}>Log Out</button>
-      <button onClick={handleHi}> meow</button>
+    <div className="flex w-screen h-screen">
+      {/* <Navbar session={session} /> */}
+      {/* <button onClick={handleSignOut}>Log Out</button>
+      <button onClick={handleHi}> meow</button> */}
+      <aside className="bg-gray-200 w-1/6 h-full"></aside>
+      <main className="bg-green-500 w-5/6 ">
+        <nav className="bg-white">Nav bar</nav>
+        <section className="bg-gray-100 px-3 pt-5 pb-10 h-full">
+          <div>header</div>
+          <div className="bg-white">basic information form</div>
+          <div className="bg-white">pet sitter form</div>
+          <div className="bg-white">address form</div>
+        </section>
+      </main>
     </div>
   );
 }
