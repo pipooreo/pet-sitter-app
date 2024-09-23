@@ -39,15 +39,19 @@ function Sitterpage() {
     );
   }
 
+  {
+    /* <Navbar session={session} /> */
+  }
+  {
+    /* <button onClick={handleSignOut}>Log Out</button>
+  <button onClick={handleHi}> meow</button> */
+  }
   return (
-    <div className="flex w-screen h-screen">
-      {/* <Navbar session={session} /> */}
-      {/* <button onClick={handleSignOut}>Log Out</button>
-      <button onClick={handleHi}> meow</button> */}
-      <aside className="bg-gray-200 w-1/6 h-full"></aside>
-      <main className="bg-green-500 w-5/6 ">
+    <div className="flex">
+      <aside className="bg-gray-200 w-1/6 "></aside>
+      <main className="w-5/6 ">
         <NavbarSitter />
-        <section className="bg-gray-100 px-3 pt-5 pb-10 h-full flex flex-col gap-6">
+        <section className="bg-gray-100 px-10 pt-5 pb-20 flex flex-col gap-6">
           <Header />
           <BasicInformationForm />
           <PetSitterForm />
