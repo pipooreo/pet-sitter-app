@@ -5,6 +5,11 @@ import Navbar from "@/components/common/Navbar";
 import { toast } from "react-toastify";
 import { BeatLoader } from "react-spinners";
 import { useRouter } from "next/navigation"; // ใช้ useRouter จาก next/navigation
+import NavbarSitter from "@/components/pet-sitter-profile/NavbarSitter";
+import Header from "@/components/pet-sitter-profile/Header";
+import BasicInformationForm from "@/components/pet-sitter-profile/BasicInformationForm";
+import PetSitterForm from "@/components/pet-sitter-profile/PetSitterForm";
+import AddressForm from "@/components/pet-sitter-profile/AddressForm";
 
 function Sitterpage() {
   const { data: session, status } = useSession();
@@ -41,12 +46,12 @@ function Sitterpage() {
       <button onClick={handleHi}> meow</button> */}
       <aside className="bg-gray-200 w-1/6 h-full"></aside>
       <main className="bg-green-500 w-5/6 ">
-        <nav className="bg-white">Nav bar</nav>
-        <section className="bg-gray-100 px-3 pt-5 pb-10 h-full">
-          <div>header</div>
-          <div className="bg-white">basic information form</div>
-          <div className="bg-white">pet sitter form</div>
-          <div className="bg-white">address form</div>
+        <NavbarSitter />
+        <section className="bg-gray-100 px-3 pt-5 pb-10 h-full flex flex-col gap-6">
+          <Header />
+          <BasicInformationForm />
+          <PetSitterForm />
+          <AddressForm />
         </section>
       </main>
     </div>
