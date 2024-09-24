@@ -5,16 +5,26 @@ import { supabase } from "@/lib/supabase.client";
 import { toast } from "react-toastify";
 import { FaTimes } from "react-icons/fa";
 
-const uploadLimit = 5;
+const uploadLimit = 10;
 
 const FileUpload = () => {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([]); // Side images
+  const [profileImage, setProfileImage] = useState(null); // Profile image
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
     addFilesToState(selectedFiles);
+  };
+
+  const addProfileImageToState = (files) => {
+    const file = files[0];
+    const preview = URL.createObjectURL(file);
+    setProfileImage({
+      file,
+      preview,
+    });
   };
 
   const addFilesToState = (selectedFiles) => {
@@ -32,7 +42,7 @@ const FileUpload = () => {
   };
 
   const handleUpload = async () => {
-    if (!files.length) {
+    if (!files.length || !profileImage) {
       toast.info("Please select or drop files to upload");
       return;
     }
@@ -40,37 +50,14 @@ const FileUpload = () => {
     try {
       setUploading(true);
 
-      const uploadedFiles = [];
-
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i].file;
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = fileName;
-
-        // Upload to Supabase: if error occurs -> throw error
-        let { error } = await supabase.storage
-          .from("test")
-          .upload(filePath, file);
-        if (error) {
-          throw error;
-        }
-
-        // Get public URL
-        const { data } = supabase.storage.from("test").getPublicUrl(filePath);
-        if (!data.publicUrl) {
-          throw new Error("Failed to get public URL");
-        }
-        uploadedFiles.push(data.publicUrl);
-      }
-
-      // Send form data to backend as data: JSON.stringify({})
+      const formData = new FormData();
+      formData.append("profileImage", profileImage.file);
+      files.forEach((file, index) => {
+        formData.append(`sideImages`, file.file);
+      });
       const response = await fetch("/api/pet-sitter/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ publicUrls: uploadedFiles }),
+        method: "PUT",
+        body: formData,
       });
 
       if (!response.ok) {
@@ -78,9 +65,10 @@ const FileUpload = () => {
         throw new Error(errorData.message);
       }
 
-      //toast and reset
+      const data = await response.json();
       toast.success("Images uploaded successfully.");
       setFiles([]);
+      setProfileImage(null);
     } catch (error) {
       toast.error("Error uploading files: " + error.message);
       console.error(error.message);
@@ -93,16 +81,10 @@ const FileUpload = () => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
-  // Drag and Drop Handlers
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
   };
-
-  //   const handleDragLeave = () => {
-  //     e.preventDefault();
-  //     setIsDragging(false);
-  //   };
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -113,7 +95,49 @@ const FileUpload = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* File Previews on the Left */}
+      <div className="flex flex-row gap-3">
+        {profileImage ? (
+          <div className="relative w-[167px] h-[167px] flex">
+            <Image
+              src={profileImage.preview}
+              alt="Profile Preview"
+              width={167}
+              height={167}
+              className="object-cover w-full h-full"
+            />
+            <FaTimes className="absolute top-1 right-1 text-red cursor-pointer" />
+          </div>
+        ) : (
+          <div
+            onDragOver={handleDragOver}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              const droppedFiles = Array.from(e.dataTransfer.files);
+              if (droppedFiles.length > 0) {
+                addProfileImageToState(droppedFiles);
+              }
+            }}
+            className={`border-2 ${
+              isDragging ? "border-blue-500" : "border-gray-300"
+            } p-3 text-center bg-white ${
+              isDragging ? "bg-gray-100" : "bg-white"
+            } cursor-pointer w-[167px] h-[167px] flex items-center justify-center`}
+            onClick={() => {
+              if (!profileImage) {
+                document.getElementById("profileInput").click();
+              }
+            }}
+          >
+            <p className="text-gray-500">
+              {profileImage
+                ? "Profile image selected"
+                : "click to select profile image"}
+            </p>
+          </div>
+        )}
+      </div>
+
       <div className="flex flex-row gap-3">
         {files.map((fileObj, index) => (
           <div key={index} className="relative w-[167px] h-[167px] flex">
@@ -131,20 +155,19 @@ const FileUpload = () => {
           </div>
         ))}
 
-        {/* upload btn */}
         <div
           onDragOver={handleDragOver}
-          //   onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`border-2 ${
             isDragging ? "border-blue-500" : "border-gray-300"
           } p-3 text-center bg-white ${
             isDragging ? "bg-gray-100" : "bg-white"
           } cursor-pointer w-[167px] h-[167px] flex items-center justify-center`}
-          onClick={() =>
-            files.length < uploadLimit &&
-            document.getElementById("fileInput").click()
-          }
+          onClick={() => {
+            if (files.length < uploadLimit) {
+              document.getElementById("fileInput").click();
+            }
+          }}
         >
           {isDragging ? (
             <p className="text-gray-500">Drop here...</p>
@@ -158,7 +181,7 @@ const FileUpload = () => {
         </div>
       </div>
 
-      {/* Hidden file input for clicking */}
+      {/* Hidden file inputs */}
       <input
         id="fileInput"
         type="file"
@@ -167,14 +190,28 @@ const FileUpload = () => {
         className="hidden"
         disabled={files.length >= uploadLimit}
       />
+      <input
+        id="profileInput"
+        type="file"
+        onChange={(e) => {
+          const selectedFile = e.target.files[0];
+          if (selectedFile) {
+            setProfileImage({
+              file: selectedFile,
+              preview: URL.createObjectURL(selectedFile),
+            });
+          }
+        }}
+        className="hidden"
+      />
 
-      {/* submit btn */}
+      {/* Submit button */}
       <div>
         <button
           onClick={handleUpload}
-          disabled={uploading || !files.length}
+          disabled={uploading || (!files.length && !profileImage)}
           className={`mt-5 px-4 py-2 rounded text-white ${
-            uploading || !files.length
+            uploading || (!files.length && !profileImage)
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-500 cursor-pointer"
           }`}
