@@ -5,7 +5,6 @@ import Navbar from "@/components/common/Navbar";
 import { toast } from "react-toastify";
 import { BeatLoader } from "react-spinners";
 import { useRouter } from "next/navigation"; // ใช้ useRouter จาก next/navigation
-
 function Sitterpage() {
   const { data: session, status } = useSession();
   const router = useRouter(); // เรียกใช้ useRouter
