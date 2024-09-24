@@ -154,8 +154,16 @@ export async function PUT(req) {
     }
 
     // sitter galleries part
-    console.log("side img--*--*-", sideImages.size);
-    if (sideImages.size > 0) {
+    console.log("side img--*--*- sitter galleries part PUT", sideImages);
+    console.log(
+      "side img length--*--*- sitter galleries part PUT",
+      sideImages.length
+    );
+    console.log(
+      "side img size --*--*- sitter galleries part PUT",
+      sideImages[0].size
+    );
+    if (sideImages.length >= 1 && sideImages[0].size > 0) {
       for (let i = 0; i < sideImages.length; i++) {
         const file = sideImages[i];
         const fileExt = file.name.split(".").pop();
@@ -173,7 +181,7 @@ export async function PUT(req) {
           .getPublicUrl(filePath); // เอาแต่ละตัวมาpush เข้าpublicUrls
         publicUrls.push(data.publicUrl);
       }
-
+      // console.log("publicUrls >>>>>>>", publicUrls);
       await connectionPool.query(
         `DELETE FROM sitter_galleries WHERE pet_sitter_profile_id = $1;`,
         [sitter_id]
@@ -184,8 +192,14 @@ export async function PUT(req) {
         [sitter_id, ...publicUrls] // The first parameter is sitter_id, followed by the publicUrls
       );
     } else {
+      // console.log("side image else case");
       await connectionPool.query(
         `DELETE FROM sitter_galleries WHERE pet_sitter_profile_id = $1;`,
+        [sitter_id]
+      );
+      await connectionPool.query(
+        `insert into sitter_galleries (pet_sitter_profile_id, img)
+         values ($1, null);`,
         [sitter_id]
       );
     }
@@ -287,7 +301,18 @@ export async function POST(req) {
     }
 
     // sitter galleries of POST section
-    if (sideImages.size > 0) {
+    console.log("side img--*--*- sitter galleries part POST", sideImages);
+    console.log(
+      "side img length--*--*- sitter galleries part POST",
+      sideImages.length
+    );
+    console.log(
+      "side img size --*--*- sitter galleries part POST",
+      sideImages[0].size
+    );
+    //  sideImages start at 1
+    if (sideImages.length >= 1 && sideImages[0].size > 0) {
+      console.log("if case");
       for (let i = 0; i < sideImages.length; i++) {
         const file = sideImages[i];
         const fileExt = file.name.split(".").pop();
@@ -308,11 +333,12 @@ export async function POST(req) {
       }
 
       await connectionPool.query(
-        `INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
+        `insert into sitter_galleries (pet_sitter_profile_id, img)
       VALUES ${publicUrls.map((_, i) => `($1, $${i + 2})`).join(", ")}`,
         [sitter_id, ...publicUrls] // Make sure the first element is sitter_id
       );
     } else {
+      console.log("side image POST ELSE CASE");
       await connectionPool.query(
         `insert into sitter_galleries (pet_sitter_profile_id, img)
          values ($1, null);`,
