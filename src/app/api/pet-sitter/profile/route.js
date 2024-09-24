@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectionPool from "@/lib/db";
 import { getToken } from "next-auth/jwt";
+import { supabase } from "@/lib/supabase.client";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -37,7 +38,7 @@ export async function GET(req) {
       left join pet_sitter_profiles p on p.user_id = u.id
       left join pet_types t on t.pet_sitter_profile_id = p.id
       left join pet_sitter_addresses a on a.pet_sitter_profile_id = p.id
-      left join sitter_galleries g on g.pet_sitter_profile_id = p.id
+      left join sitter_galleries g on g.pet_sitter_profile_id = p.user_id
       where u.id = $1 and u.role = 'sitter'
       group by u.email, u.phone, p.name, p.profile_image, p.experience, p.id_number, p.birthday, p.introduction, p.trade_name,
       p.place, a.address_detail, a.district, a.subdistrict, a.province, a.postcode, p.status`,
@@ -79,6 +80,19 @@ export async function PUT(req) {
   const province = formData.get("province");
   const postcode = formData.get("postcode");
   const date = new Date();
+  // picture --------
+  const profilePic = formData.get("profilePic");
+  const sideImages = formData.getAll("sideImages");
+  const profileFileExt = profilePic.name.split(".").pop();
+  const profileFileName = `${Math.random()}.${profileFileExt}`;
+  const profileFilePath = `profiles/${profileFileName}`;
+  const publicUrls = [];
+  // console.log(formData);
+  const { data: profileData } = supabase.storage
+    .from("attachments")
+    .getPublicUrl(profileFilePath);
+  // Get public URL for the new profile image
+  let profileUrl = profileData.publicUrl;
   try {
     await connectionPool.query(
       `update pet_sitter_profiles
@@ -112,6 +126,42 @@ export async function PUT(req) {
         sitter_id,
         date,
       ]
+    );
+    console.log("profileUrl", profileUrl);
+    console.log("publicUrls", publicUrls);
+
+    //supabase bucket ----------
+
+    for (let i = 0; i < sideImages.length; i++) {
+      const file = sideImages[i];
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `sitter-galleries/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("attachments")
+        .upload(filePath, file);
+      if (error) {
+        throw new Error("Failed to upload side image: " + error.message);
+      }
+
+      const { data } = supabase.storage
+        .from("attachments")
+        .getPublicUrl(filePath);
+      publicUrls.push(data.publicUrl);
+    }
+    await connectionPool.query(
+      `update pet_sitter_profiles set profile_image = $1 WHERE user_id = $2;`,
+      [profileUrl, sitter_id]
+    );
+    await connectionPool.query(
+      `DELETE FROM sitter_galleries WHERE pet_sitter_profile_id = $1;`,
+      [sitter_id]
+    );
+    await connectionPool.query(
+      `INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
+       VALUES ${publicUrls.map((_, i) => `($1, $${i + 2})`).join(", ")}`,
+      [sitter_id, ...publicUrls] // The first parameter is sitter_id, followed by the publicUrls
     );
 
     return NextResponse.json(
@@ -148,7 +198,19 @@ export async function POST(req) {
   const subdistrict = formData.get("subdistrict");
   const province = formData.get("province");
   const postcode = formData.get("postcode");
+  // picture --------
+  const profilePic = formData.get("profilePic");
+  const sideImages = formData.getAll("sideImages");
+  const profileFileExt = profilePic.name.split(".").pop();
+  const profileFileName = `${Math.random()}.${profileFileExt}`;
+  const profileFilePath = `profiles/${profileFileName}`;
+  const publicUrls = [];
   // console.log(formData);
+  const { data: profileData } = supabase.storage
+    .from("attachments")
+    .getPublicUrl(profileFilePath);
+  // Get public URL for the new profile image
+  let profileUrl = profileData.publicUrl;
 
   const date = new Date();
   const status = "Waiting for approve";
@@ -171,6 +233,39 @@ export async function POST(req) {
       `insert into pet_sitter_addresses (address_detail, district, subdistrict, province, postcode, pet_sitter_profile_id)
     values ($1, $2, $3, $4, $5, (select id from pet_sitter_profiles where user_id = $6))`,
       [address_detail, district, subdistrict, province, postcode, sitter_id]
+    );
+
+    //supabase bucket ----------
+
+    for (let i = 0; i < sideImages.length; i++) {
+      const file = sideImages[i];
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `sitter-galleries/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("attachments")
+        .upload(filePath, file);
+      if (error) {
+        throw new Error("Failed to upload side image: " + error.message);
+      }
+
+      const { data } = supabase.storage
+        .from("attachments")
+        .getPublicUrl(filePath);
+      publicUrls.push(data.publicUrl);
+    }
+    // console.log("prof URL -=-=-==-=", profileUrl);
+    // console.log("id -=-=-==-=", sitter_id);
+    await connectionPool.query(
+      `update pet_sitter_profiles set profile_image = $1 where user_id = $2`,
+      [profileUrl, sitter_id]
+    );
+    // console.log("public url =-=-=-=-=-=-", publicUrls);
+    await connectionPool.query(
+      `INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
+      VALUES ${publicUrls.map((_, i) => `($1, $${i + 2})`).join(", ")}`,
+      [sitter_id, ...publicUrls] // Make sure the first element is sitter_id
     );
 
     return NextResponse.json(
