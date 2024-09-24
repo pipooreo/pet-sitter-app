@@ -14,24 +14,29 @@ export async function POST(req) {
       });
     }
 
-    const { publicUrl } = await req.json();
-    console.log("Public URL from request:", publicUrl);
+    const { publicUrls } = await req.json();
+    console.log("Public URLs from request:", publicUrls);
 
-    if (!publicUrl) {
-      throw new Error("No public URL provided");
+    if (!publicUrls || !Array.isArray(publicUrls)) {
+      throw new Error("No valid public URLs provided");
     }
 
     const sitter_id = token.id;
 
-    const { rows } = await connectionPool.query(
-      `INSERT INTO sitter_galleries (pet_sitter_profile_id, img) VALUES ($1, $2) RETURNING *`,
-      [sitter_id, publicUrl]
-    );
+    const queryText = `
+      INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
+      VALUES ${publicUrls.map((_, i) => `($1, $${i + 2})`).join(", ")}
+      RETURNING *;
+    `;
+    
+    const queryValues = [sitter_id, ...publicUrls];
+
+    const { rows } = await connectionPool.query(queryText, queryValues);
 
     return new Response(
       JSON.stringify({
-        message: "Image URL saved successfully.",
-        data: rows[0],
+        message: "Images saved successfully.",
+        data: rows,
       }),
       { status: 200 }
     );
