@@ -1,32 +1,43 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect, useRef } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { LuUser2 } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 import { ImNotification } from "react-icons/im";
+import { useProfile } from "@/context/PetSitterProfileContext";
+import { toast } from "react-toastify";
 
-export default function BasicInformationForm() {
+export default function BasicInformationForm({
+  handleSubmit,
+  handleRequest,
+  formikRef,
+}) {
+  const { profileData } = useProfile();
   const [preview, setPreview] = useState(null);
 
   const validationSchema = Yup.object().shape({
-    profileImage: Yup.mixed()
-      .required("A file is required")
-      .test(
-        "fileSize",
-        "File too large",
-        (value) => value && value.size <= 1024 * 1024
-      )
-      .test(
-        "fileFormat",
-        "Unsupported Format",
-        (value) =>
-          value && ["image/jpg", "image/jpeg", "image/png"].includes(value.type)
-      ),
+    profileImage: Yup.mixed().test(
+      "required",
+      "Please choose your profile image",
+      function (value) {
+        if (profileData?.profileImage) {
+          return true;
+        }
+        return value != null;
+      }
+    ),
     fullName: Yup.string().required("Full name is required"),
     experience: Yup.string().required("Experience is required"),
-    phone: Yup.string().required("Phone number is required"),
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    introduction: Yup.string().required("Introduction is required"),
+    phone: Yup.string()
+      .required("Phone number is required")
+      .matches(/^\d{10}$/, "Please enter a valid Thai phone number"),
+    email: Yup.string()
+      .matches(
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        "Please enter a format email (email@company.com)"
+      )
+      .required("Please enter your email"),
   });
 
   const handlePreview = (event) => {
@@ -40,26 +51,37 @@ export default function BasicInformationForm() {
     }
   };
 
+  useEffect(() => {
+    if (profileData?.profileImage) {
+      setPreview(profileData.profileImage);
+    }
+  }, [profileData]);
+
   return (
-    <div className="bg-white p-[40px_80px] flex flex-col gap-[24px] rounded-[16px]">
+    <div className="bg-white p-[40px_80px] flex flex-col gap-[24px] rounded-3xl">
       <div className="text-head4 text-gray-300">Basic Information</div>
       <Formik
+        innerRef={formikRef}
+        enableReinitialize={true}
         initialValues={{
-          profileImage: null,
-          fullName: "",
-          experience: "",
-          phone: "",
-          email: "",
-          introduction: "",
+          profileImage: profileData.profileImage || "",
+          fullName: profileData.fullName || "",
+          experience: profileData.experience || "",
+          phone: profileData.phone || "",
+          email: profileData.email || "",
+          introduction: profileData.introduction || "",
         }}
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting }) => {
-          console.log(values);
-          setSubmitting(false);
+          if (profileData.status === "Approved") {
+            handleSubmit(values, { setSubmitting });
+          } else {
+            handleRequest(values, { setSubmitting });
+          }
         }}
       >
-        {({ errors, touched, setFieldValue }) => (
-          <Form className="flex flex-col gap-[24px]">
+        {({ errors, touched, setFieldValue, handleSubmit, isSubmitting }) => (
+          <Form className="flex flex-col gap-[24px]" onSubmit={handleSubmit}>
             <div className="relative w-[240px] h-[240px]">
               <label htmlFor="image" className="text-black text-body2 ">
                 Profile Image
@@ -98,8 +120,9 @@ export default function BasicInformationForm() {
                 {errors.profileImage}
               </div>
             )}
+
             <div className="flex  gap-[40px] mt-[40px] w-full">
-              <div className="w-full">
+              <div className="w-full relative">
                 <label htmlFor="fullname" className="text-black text-body2 ">
                   Your full name*
                 </label>
@@ -110,11 +133,16 @@ export default function BasicInformationForm() {
                     errors.fullName && touched.fullName
                       ? "border-red"
                       : "border-gray-200"
-                  } focus:border-orange-400`}
+                  } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500`}
                 />
                 {errors.fullName && touched.fullName && (
-                  <div className="text-red text-sm">{errors.fullName}</div>
+                  <ImNotification className="absolute right-3 top-[45px]  text-red" />
                 )}
+                <ErrorMessage
+                  name="fullName"
+                  component="div"
+                  className="text-red mb-2"
+                />
               </div>
 
               <div className="w-full">
@@ -125,15 +153,15 @@ export default function BasicInformationForm() {
                   name="experience"
                   as="select"
                   className={`w-full p-[12px_16px_12px_12px] bg-white border rounded-lg outline-none transition-colors duration-200  ${
-                    errors.fullName && touched.fullName
+                    errors.experience && touched.experience
                       ? "border-red"
                       : "border-gray-200"
-                  } focus:border-orange-400`}
+                  } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500`}
                 >
                   <option value="">Select experience</option>
-                  <option value="beginner">0-2 Years</option>
-                  <option value="intermediate">3-5 Years</option>
-                  <option value="expert">5+ Years</option>
+                  <option value={2}>0-2 Years</option>
+                  <option value={4}>3-5 Years</option>
+                  <option value={5}>5+ Years</option>
                 </Field>
                 {errors.experience && touched.experience && (
                   <div className="text-red text-sm">{errors.experience}</div>
@@ -141,22 +169,27 @@ export default function BasicInformationForm() {
               </div>
             </div>
             <div className="flex gap-[40px]">
-              <div className="w-full">
-                <label htmlFor="email" className="text-black text-body2 ">
-                  Phone*
+              <div className="w-full relative">
+                <label htmlFor="phone" className="text-black text-body2 ">
+                  Phone Number*
                 </label>
                 <Field
                   name="phone"
                   type="tel"
                   className={`w-full p-[12px_16px_12px_12px] bg-white border rounded-lg outline-none transition-colors duration-200  ${
-                    errors.fullName && touched.fullName
+                    errors.phone && touched.phone
                       ? "border-red"
                       : "border-gray-200"
-                  } focus:border-orange-400`}
+                  } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500`}
                 />
                 {errors.phone && touched.phone && (
-                  <div className="text-red text-sm">{errors.phone}</div>
+                  <ImNotification className="absolute right-3 top-[45px]  text-red" />
                 )}
+                <ErrorMessage
+                  name="phone"
+                  component="div"
+                  className="text-red mb-2"
+                />
               </div>
               <div className="w-full relative">
                 <label htmlFor="email" className="text-black text-body2 ">
@@ -169,7 +202,7 @@ export default function BasicInformationForm() {
                     errors.email && touched.email
                       ? "border-red"
                       : "border-gray-200"
-                  } focus:border-orange-400`}
+                  } focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500`}
                 />
                 {errors.email && touched.email && (
                   <ImNotification className="absolute right-3 top-[45px]  text-red" />
@@ -189,15 +222,15 @@ export default function BasicInformationForm() {
               <Field
                 name="introduction"
                 as="textarea"
-                className="w-full h-[140px] p-[12px_16px_12px_12px] bg-white border rounded-lg outline-none transition-colors duration-200 border-gray-200 focus:border-orange-400"
+                className="w-full h-[140px] p-[12px_16px_12px_12px] bg-white border rounded-lg outline-none transition-colors duration-200 border-gray-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
             </div>
-            <button
+            {/* <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              className="text-white font-bold rounded-full p-[12px_24px] bg-orange-500 hover:bg-orange-400 active:bg-orange-600"
             >
               Submit
-            </button>
+            </button> */}
           </Form>
         )}
       </Formik>

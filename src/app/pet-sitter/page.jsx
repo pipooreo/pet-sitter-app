@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { BeatLoader } from "react-spinners";
 import { useRouter } from "next/navigation";
@@ -13,11 +15,15 @@ import { LuUser2 } from "react-icons/lu";
 import { CiCalendar } from "react-icons/ci";
 import { FaListUl } from "react-icons/fa6";
 import { BsCreditCard } from "react-icons/bs";
+import { useSession, signOut } from "next-auth/react";
+import { useProfile } from "@/context/PetSitterProfileContext";
+
 function Sitterpage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedMenu, setSelectedMenu] = useState("profile");
-
+  const formikRef = useRef(null);
+  const { createProfileData, updateProfileData } = useProfile();
   const handleSignOut = async () => {
     try {
       await signOut({ redirect: false }); // ป้องกันการรีไดเรกต์ทันที
@@ -30,6 +36,34 @@ function Sitterpage() {
 
   const handleMenuSelect = (menu) => {
     setSelectedMenu(menu);
+  };
+
+  const handleSubmit = async (values, { setSubmitting }) => {
+    console.log("handleFormSubmit called with values:", values);
+
+    try {
+      await updateProfileData(values); // Call the updateProfileData from context
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error("An error occurred while updating the profile.");
+    } finally {
+      setSubmitting(false); // Ensure to set submitting state back to false
+    }
+  };
+
+  const handleRequest = async (values, { setSubmitting }) => {
+    console.log("handleFormSubmit called with values:", values);
+
+    try {
+      await createProfileData(values); // Call the updateProfileData from context
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error("An error occurred while updating the profile.");
+    } finally {
+      setSubmitting(false); // Ensure to set submitting state back to false
+    }
   };
 
   if (status === "loading") {
@@ -46,10 +80,6 @@ function Sitterpage() {
     return null; // ไม่ต้อง render อะไรในขณะนี้
   }
 
-  {
-    /* <button onClick={handleSignOut}>Log Out</button>
-     */
-  }
   return (
     <PetSitterProfileProvider>
       <div className="flex">
@@ -62,8 +92,16 @@ function Sitterpage() {
             />
             {selectedMenu === "profile" && (
               <section className="flex flex-col gap-6 p-[40px]">
-                <Header />
-                <BasicInformationForm />
+                {/* <Header onSubmit={handleFormSubmit} onRequest={handleRequest} /> */}
+                <Header
+                  onSubmit={() => formikRef.current.submitForm()}
+                  onRequest={() => formikRef.current.submitForm()}
+                />
+                <BasicInformationForm
+                  formikRef={formikRef}
+                  handleSubmit={handleSubmit}
+                  handleRequest={handleRequest}
+                />
                 <PetSitterForm />
                 <AddressForm />
               </section>

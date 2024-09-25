@@ -2,8 +2,13 @@ import React from "react";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 import { LuUser2 } from "react-icons/lu";
 import Avatar from "@mui/material/Avatar";
+import { useProfile } from "@/context/PetSitterProfileContext";
+
 export default function NavbarSitter() {
-  const userAvatar = "";
+  const { profileData } = useProfile();
+  const userAvatar = profileData.profileImage || "";
+  const userName = profileData.fullName || "";
+
   return (
     <div className=" bg-white p-[16px_60px] flex justify-between items-center sticky top-0 z-20">
       <div className="flex justify-center items-center gap-2">
@@ -18,8 +23,7 @@ export default function NavbarSitter() {
             <LuUser2 className="w-[20px] h-[20px] text-gray-400" />
           </div>
         )}
-        <span className="text-body2 text-gray-600">{userAvatar}</span>
-        <span className="text-body2 text-gray-600">Jane Maison</span>
+        <span className="text-body2 text-gray-600">{userName}</span>
       </div>
       <div className="rounded-full w-[40px] h-[40px] text-gray-400 bg-gray-100 flex justify-center items-center">
         <HiOutlineChatBubbleLeftRight className=" w-[20px] h-[20px]" />
