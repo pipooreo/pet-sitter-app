@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectionPool from "@/lib/db";
 import { getToken } from "next-auth/jwt";
 import { supabase } from "@/lib/supabase.client";
+import { validateSitterForm } from "@/middlewares/validate.sitter.profile";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -30,8 +31,8 @@ export async function GET(req) {
       a.subdistrict,
       a.province,
       a.postcode,
+      p.services,
       array_agg(distinct t.type::text) as pet_type, 
-      array_agg(distinct t.service) as service,
       array_agg(distinct g.img) as galleries,
       p.status
       from users u
@@ -40,7 +41,7 @@ export async function GET(req) {
       left join pet_sitter_addresses a on a.pet_sitter_profile_id = p.id
       left join sitter_galleries g on g.pet_sitter_profile_id = p.user_id
       where u.id = $1 and u.role = 'sitter'
-      group by u.email, u.phone, p.name, p.profile_image, p.experience, p.id_number, p.birthday, p.introduction, p.trade_name,
+      group by u.email, u.phone, p.name, p.profile_image, p.experience, p.id_number, p.birthday, p.introduction, p.trade_name, p.services,
       p.place, a.address_detail, a.district, a.subdistrict, a.province, a.postcode, p.status`,
       [sitter_id]
     );
@@ -65,40 +66,82 @@ export async function PUT(req) {
   if (!token) {
     return new Response("Unauthorized", { status: 401 });
   }
+
   const sitter_id = token.id;
   const formData = await req.formData();
+
+  const validationError = await validateSitterForm(formData);
+  if (validationError) {
+    return validationError;
+  }
+
   const name = formData.get("name");
   const experience = formData.get("experience");
   const trade_name = formData.get("trade_name");
-  const introduction = formData.get("introduction");
-  const place = formData.get("place");
+  const introduction = formData.get("introduction") ?? null;
+  const place = formData.get("place") ?? null;
   const pet_type = formData.getAll("pet_type");
-  const service = formData.getAll("service");
+  const services = formData.get("services") ?? null;
   const address_detail = formData.get("address_detail");
   const district = formData.get("district");
   const subdistrict = formData.get("subdistrict");
   const province = formData.get("province");
   const postcode = formData.get("postcode");
   const date = new Date();
-  // picture --------
-  const profilePic = formData.get("profilePic");
-  const sideImages = formData.getAll("sideImages");
-  const profileFileExt = profilePic.name.split(".").pop();
-  const profileFileName = `${Math.random()}.${profileFileExt}`;
-  const profileFilePath = `profiles/${profileFileName}`;
+  const profilePic = formData.get("profile_image");
+  const sideImages = formData.getAll("galleries");
   const publicUrls = [];
-  // console.log(formData);
-  const { data: profileData } = supabase.storage
-    .from("attachments")
-    .getPublicUrl(profileFilePath);
-  // Get public URL for the new profile image
-  let profileUrl = profileData.publicUrl;
+  // console.log("sideImages -*--*---*-*-", sideImages);
+  // console.log("profilePic -*--*---*-*-", profilePic);
   try {
+    // console.log("Prof -*--*---*-*-", sideImages);
+
+    // Check if profilePic exists and its type is an image
+    if (profilePic.size > 0 && !profilePic.type.startsWith("image/")) {
+      console.log("Profile picture is not an image. Returning 404.");
+      return NextResponse.json(
+        {
+          message: " 404 Not found result",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Check if sideImages exists and has valid images
+    if (sideImages.length > 0) {
+      for (let i = 0; i < sideImages.length; i++) {
+        const file = sideImages[i];
+        // condi !== 0 for check null value
+        if (!file.type.startsWith("image/") && file.size !== 0) {
+          console.log(
+            `File at index ${i} in sideImages is not an image. Returning 404.`
+          );
+          return NextResponse.json(
+            {
+              message: " 404 Not found result",
+            },
+            { status: 404 }
+          );
+        }
+      }
+    }
+
+    // Proceed with your logic if either profilePic or sideImages are valid or null
+
     await connectionPool.query(
       `update pet_sitter_profiles
-      set name = $1, experience = $2, introduction = $3, place = $4, trade_name = $6, updated_at = $7
+      set name = $1, experience = $2, introduction = $3, place = $4, trade_name = $6, updated_at = $7, services = $8
       where user_id = $5`,
-      [name, experience, introduction, place, sitter_id, trade_name, date]
+      [
+        name,
+        experience,
+        introduction,
+        place,
+        sitter_id,
+        trade_name,
+        date,
+        services,
+      ]
     );
 
     await connectionPool.query(
@@ -108,9 +151,9 @@ export async function PUT(req) {
 
     for (let i = 0; i < pet_type.length; i++) {
       await connectionPool.query(
-        `insert into pet_types (type, service, pet_sitter_profile_id)
-        values ($1, $2, (select id from pet_sitter_profiles where user_id = $3))`,
-        [pet_type[i], service[i], sitter_id]
+        `insert into pet_types (type, pet_sitter_profile_id)
+        values ($1, (select id from pet_sitter_profiles where user_id = $2))`,
+        [pet_type[i], sitter_id]
       );
     }
 
@@ -127,42 +170,83 @@ export async function PUT(req) {
         date,
       ]
     );
-    console.log("profileUrl", profileUrl);
-    console.log("publicUrls", publicUrls);
 
-    //supabase bucket ----------
-
-    for (let i = 0; i < sideImages.length; i++) {
-      const file = sideImages[i];
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `sitter-galleries/${fileName}`;
-
-      const { error } = await supabase.storage
+    // profile pic of PUT section
+    // console.log(profilePic.size);
+    if (profilePic.size > 0) {
+      const profileFileExt = profilePic.name.split(".").pop();
+      const profileFileName = `${Math.random()}.${profileFileExt}`;
+      const profileFilePath = `sitter-profile/${profileFileName}`;
+      const { error: profileError } = await supabase.storage
         .from("attachments")
-        .upload(filePath, file);
-      if (error) {
-        throw new Error("Failed to upload side image: " + error.message);
+        .upload(profileFilePath, profilePic); // file path (attachments/sitter-profile) ไม่มีก็สร้าง
+
+      if (profileError) {
+        throw new Error(
+          "Failed to upload profile image: " + profileError.message
+        );
       }
-
-      const { data } = supabase.storage
+      //เอาไฟล์เข้าไปในattachment bucket
+      const { data: profileData } = supabase.storage
         .from("attachments")
-        .getPublicUrl(filePath);
-      publicUrls.push(data.publicUrl);
+        .getPublicUrl(profileFilePath); //เอาurlมาเก็บในprofile Data
+
+      let profileUrl = profileData.publicUrl;
+
+      await connectionPool.query(
+        `update pet_sitter_profiles set profile_image = $1 where user_id = $2`,
+        [profileUrl, sitter_id]
+      );
+    } else {
+      // ไม่มีก็set NULL
+      await connectionPool.query(
+        `UPDATE pet_sitter_profiles SET profile_image = NULL WHERE user_id = $1;`,
+        [sitter_id]
+      );
     }
-    await connectionPool.query(
-      `update pet_sitter_profiles set profile_image = $1 WHERE user_id = $2;`,
-      [profileUrl, sitter_id]
-    );
-    await connectionPool.query(
-      `DELETE FROM sitter_galleries WHERE pet_sitter_profile_id = $1;`,
-      [sitter_id]
-    );
-    await connectionPool.query(
-      `INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
+
+    // sitter galleries part
+    if (sideImages.length >= 1 && sideImages[0].size > 0) {
+      for (let i = 0; i < sideImages.length; i++) {
+        const file = sideImages[i];
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `sitter-galleries/${fileName}`;
+
+        const { error } = await supabase.storage
+          .from("attachments")
+          .upload(filePath, file); // ใส่แต่ละไฟล์ไปใน attashments/sitter-galleries
+        if (error) {
+          throw new Error("Failed to upload side image: " + error.message);
+        }
+        const { data } = supabase.storage
+          .from("attachments")
+          .getPublicUrl(filePath); // เอาแต่ละตัวมาpush เข้าpublicUrls
+        publicUrls.push(data.publicUrl);
+        // console.log("push url");
+      }
+      // console.log("publicUrls >>>>>>>", publicUrls);
+      await connectionPool.query(
+        `DELETE FROM sitter_galleries WHERE pet_sitter_profile_id = $1;`,
+        [sitter_id]
+      );
+      await connectionPool.query(
+        `INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
        VALUES ${publicUrls.map((_, i) => `($1, $${i + 2})`).join(", ")}`,
-      [sitter_id, ...publicUrls] // The first parameter is sitter_id, followed by the publicUrls
-    );
+        [sitter_id, ...publicUrls] // The first parameter is sitter_id, followed by the publicUrls
+      );
+    } else {
+      // console.log("side image else case");
+      await connectionPool.query(
+        `DELETE FROM sitter_galleries WHERE pet_sitter_profile_id = $1;`,
+        [sitter_id]
+      );
+      await connectionPool.query(
+        `insert into sitter_galleries (pet_sitter_profile_id, img)
+         values ($1, null);`,
+        [sitter_id]
+      );
+    }
 
     return NextResponse.json(
       {
@@ -186,46 +270,86 @@ export async function POST(req) {
   }
   const sitter_id = token.id;
   const formData = await req.formData();
+
+  const validationError = await validateSitterForm(formData);
+  if (validationError) {
+    return validationError;
+  }
+
   const name = formData.get("name");
   const experience = formData.get("experience");
   const trade_name = formData.get("trade_name");
-  const introduction = formData.get("introduction");
-  const place = formData.get("place");
+  const introduction = formData.get("introduction") ?? null;
+  const place = formData.get("place") ?? null;
   const pet_type = formData.getAll("pet_type");
-  const service = formData.getAll("service");
+  const services = formData.get("services") ?? null;
   const address_detail = formData.get("address_detail");
   const district = formData.get("district");
   const subdistrict = formData.get("subdistrict");
   const province = formData.get("province");
   const postcode = formData.get("postcode");
-  // picture --------
-  const profilePic = formData.get("profilePic");
-  const sideImages = formData.getAll("sideImages");
-  const profileFileExt = profilePic.name.split(".").pop();
-  const profileFileName = `${Math.random()}.${profileFileExt}`;
-  const profileFilePath = `profiles/${profileFileName}`;
+  const profilePic = formData.get("profile_image");
+  const sideImages = formData.getAll("galleries");
   const publicUrls = [];
-  // console.log(formData);
-  const { data: profileData } = supabase.storage
-    .from("attachments")
-    .getPublicUrl(profileFilePath);
-  // Get public URL for the new profile image
-  let profileUrl = profileData.publicUrl;
-
   const date = new Date();
   const status = "Waiting for approve";
+  // console.log(formData);
+
   try {
+    // Check if profilePic exists and its type is an image
+    if (profilePic.size > 0 && !profilePic.type.startsWith("image/")) {
+      console.log("Profile picture is not an image. Returning 404.");
+      return NextResponse.json(
+        {
+          message: " 404 Not found result",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Check if sideImages exists and has valid images
+    // console.log("side-*--", sideImages);
+    // console.log("side length-*--", sideImages.length);
+    if (sideImages.length > 0) {
+      for (let i = 0; i < sideImages.length; i++) {
+        // console.log("sideImages i-*--", sideImages[i].size);
+        // if ((sideImages[i].size = 0)) {
+        const file = sideImages[i];
+        // condi !== 0 for check null value
+        if (!file.type.startsWith("image/") && file.size !== 0) {
+          console.log(
+            `File at index ${i} in sideImages is not an image. Returning 404.`
+          );
+          return NextResponse.json(
+            {
+              message: " 404 Not found result",
+            },
+            { status: 404 }
+          );
+        }
+        // }
+      }
+    }
     await connectionPool.query(
-      `insert into pet_sitter_profiles (name, experience, introduction, place, user_id, trade_name, status)
-    values ($1, $2, $3, $4, $5, $6, $7)`,
-      [name, experience, introduction, place, sitter_id, trade_name, status]
+      `insert into pet_sitter_profiles (name, experience, introduction, place, user_id, trade_name, status, services)
+    values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        name,
+        experience,
+        introduction,
+        place,
+        sitter_id,
+        trade_name,
+        status,
+        services,
+      ]
     );
 
     for (let i = 0; i < pet_type.length; i++) {
       await connectionPool.query(
-        `insert into pet_types (type, service, pet_sitter_profile_id)
-      values ($1, $2, (select id from pet_sitter_profiles where user_id = $3))`,
-        [pet_type[i], service[i], sitter_id]
+        `insert into pet_types (type, pet_sitter_profile_id)
+      values ($1, (select id from pet_sitter_profiles where user_id = $2))`,
+        [pet_type[i], sitter_id]
       );
     }
 
@@ -235,38 +359,75 @@ export async function POST(req) {
       [address_detail, district, subdistrict, province, postcode, sitter_id]
     );
 
-    //supabase bucket ----------
-
-    for (let i = 0; i < sideImages.length; i++) {
-      const file = sideImages[i];
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `sitter-galleries/${fileName}`;
-
-      const { error } = await supabase.storage
+    // profile pic of POST section
+    if (profilePic.size > 0) {
+      const profileFileExt = profilePic.name.split(".").pop();
+      const profileFileName = `${Math.random()}.${profileFileExt}`;
+      const profileFilePath = `sitter-profile/${profileFileName}`;
+      const { error: profileError } = await supabase.storage
         .from("attachments")
-        .upload(filePath, file);
-      if (error) {
-        throw new Error("Failed to upload side image: " + error.message);
+        .upload(profileFilePath, profilePic); // ไม่มีก็สร้าง
+
+      if (profileError) {
+        throw new Error(
+          "Failed to upload profile image: " + profileError.message
+        );
+      }
+      //เอาไฟล์เข้าไปในattachment bucket
+      const { data: profileData } = supabase.storage
+        .from("attachments")
+        .getPublicUrl(profileFilePath); //เอาurlมาเก็บในprofile Data
+
+      let profileUrl = profileData.publicUrl;
+      // console.log("oporf adta=-==-=", profileData);
+
+      await connectionPool.query(
+        `update pet_sitter_profiles set profile_image = $1 where user_id = $2`,
+        [profileUrl, sitter_id]
+      );
+    } else {
+      // ไม่มีก็set NULL
+      await connectionPool.query(
+        `UPDATE pet_sitter_profiles SET profile_image = NULL WHERE user_id = $1;`,
+        [sitter_id]
+      );
+    }
+
+    // sitter galleries of POST section
+    if (sideImages.length >= 1 && sideImages[0].size > 0) {
+      // console.log("if case");
+      for (let i = 0; i < sideImages.length; i++) {
+        const file = sideImages[i];
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `sitter-galleries/${fileName}`;
+
+        const { error } = await supabase.storage
+          .from("attachments")
+          .upload(filePath, file); //อัพโหลดรูปไปทีละรูป
+        if (error) {
+          throw new Error("Failed to upload side image: " + error.message);
+        }
+
+        const { data } = supabase.storage
+          .from("attachments")
+          .getPublicUrl(filePath);
+        publicUrls.push(data.publicUrl); //เอารูปแต่ละรูปที่ออัพโหลดไปมาใช้ใน publicUrls
       }
 
-      const { data } = supabase.storage
-        .from("attachments")
-        .getPublicUrl(filePath);
-      publicUrls.push(data.publicUrl);
-    }
-    // console.log("prof URL -=-=-==-=", profileUrl);
-    // console.log("id -=-=-==-=", sitter_id);
-    await connectionPool.query(
-      `update pet_sitter_profiles set profile_image = $1 where user_id = $2`,
-      [profileUrl, sitter_id]
-    );
-    // console.log("public url =-=-=-=-=-=-", publicUrls);
-    await connectionPool.query(
-      `INSERT INTO sitter_galleries (pet_sitter_profile_id, img)
+      await connectionPool.query(
+        `insert into sitter_galleries (pet_sitter_profile_id, img)
       VALUES ${publicUrls.map((_, i) => `($1, $${i + 2})`).join(", ")}`,
-      [sitter_id, ...publicUrls] // Make sure the first element is sitter_id
-    );
+        [sitter_id, ...publicUrls] // Make sure the first element is sitter_id
+      );
+    } else {
+      // console.log("side image POST ELSE CASE");
+      await connectionPool.query(
+        `insert into sitter_galleries (pet_sitter_profile_id, img)
+         values ($1, null);`,
+        [sitter_id]
+      );
+    }
 
     return NextResponse.json(
       {
