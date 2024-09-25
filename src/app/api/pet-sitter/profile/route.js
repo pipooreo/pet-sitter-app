@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectionPool from "@/lib/db";
 import { getToken } from "next-auth/jwt";
 import { supabase } from "@/lib/supabase.client";
+import { validateSitterForm } from "@/middlewares/validate.sitter.profile";
 
 const secret = process.env.NEXTAUTH_SECRET;
 
@@ -30,8 +31,8 @@ export async function GET(req) {
       a.subdistrict,
       a.province,
       a.postcode,
+      p.services,
       array_agg(distinct t.type::text) as pet_type, 
-      array_agg(distinct t.service) as service,
       array_agg(distinct g.img) as galleries,
       p.status
       from users u
@@ -40,7 +41,7 @@ export async function GET(req) {
       left join pet_sitter_addresses a on a.pet_sitter_profile_id = p.id
       left join sitter_galleries g on g.pet_sitter_profile_id = p.user_id
       where u.id = $1 and u.role = 'sitter'
-      group by u.email, u.phone, p.name, p.profile_image, p.experience, p.id_number, p.birthday, p.introduction, p.trade_name,
+      group by u.email, u.phone, p.name, p.profile_image, p.experience, p.id_number, p.birthday, p.introduction, p.trade_name, p.services,
       p.place, a.address_detail, a.district, a.subdistrict, a.province, a.postcode, p.status`,
       [sitter_id]
     );
@@ -65,15 +66,22 @@ export async function PUT(req) {
   if (!token) {
     return new Response("Unauthorized", { status: 401 });
   }
+
   const sitter_id = token.id;
   const formData = await req.formData();
+
+  const validationError = await validateSitterForm(formData);
+  if (validationError) {
+    return validationError;
+  }
+
   const name = formData.get("name");
   const experience = formData.get("experience");
   const trade_name = formData.get("trade_name");
-  const introduction = formData.get("introduction");
-  const place = formData.get("place");
+  const introduction = formData.get("introduction") ?? null;
+  const place = formData.get("place") ?? null;
   const pet_type = formData.getAll("pet_type");
-  const service = formData.getAll("service");
+  const services = formData.get("services") ?? null;
   const address_detail = formData.get("address_detail");
   const district = formData.get("district");
   const subdistrict = formData.get("subdistrict");
@@ -84,12 +92,22 @@ export async function PUT(req) {
   const sideImages = formData.getAll("sideImages");
   const publicUrls = [];
   // console.log("Prof -*--*---*-*-", sideImages);
+
   try {
     await connectionPool.query(
       `update pet_sitter_profiles
-      set name = $1, experience = $2, introduction = $3, place = $4, trade_name = $6, updated_at = $7
+      set name = $1, experience = $2, introduction = $3, place = $4, trade_name = $6, updated_at = $7, services = $8
       where user_id = $5`,
-      [name, experience, introduction, place, sitter_id, trade_name, date]
+      [
+        name,
+        experience,
+        introduction,
+        place,
+        sitter_id,
+        trade_name,
+        date,
+        services,
+      ]
     );
 
     await connectionPool.query(
@@ -99,9 +117,9 @@ export async function PUT(req) {
 
     for (let i = 0; i < pet_type.length; i++) {
       await connectionPool.query(
-        `insert into pet_types (type, service, pet_sitter_profile_id)
-        values ($1, $2, (select id from pet_sitter_profiles where user_id = $3))`,
-        [pet_type[i], service[i], sitter_id]
+        `insert into pet_types (type, pet_sitter_profile_id)
+        values ($1, (select id from pet_sitter_profiles where user_id = $2))`,
+        [pet_type[i], sitter_id]
       );
     }
 
@@ -226,13 +244,19 @@ export async function POST(req) {
   }
   const sitter_id = token.id;
   const formData = await req.formData();
+
+  const validationError = await validateSitterForm(formData);
+  if (validationError) {
+    return validationError;
+  }
+
   const name = formData.get("name");
   const experience = formData.get("experience");
   const trade_name = formData.get("trade_name");
-  const introduction = formData.get("introduction");
-  const place = formData.get("place");
+  const introduction = formData.get("introduction") ?? null;
+  const place = formData.get("place") ?? null;
   const pet_type = formData.getAll("pet_type");
-  const service = formData.getAll("service");
+  const services = formData.get("services") ?? null;
   const address_detail = formData.get("address_detail");
   const district = formData.get("district");
   const subdistrict = formData.get("subdistrict");
@@ -243,20 +267,29 @@ export async function POST(req) {
   const publicUrls = [];
   const date = new Date();
   const status = "Waiting for approve";
-  // console.log(formData);
+  console.log(experience);
 
   try {
     await connectionPool.query(
-      `insert into pet_sitter_profiles (name, experience, introduction, place, user_id, trade_name, status)
-    values ($1, $2, $3, $4, $5, $6, $7)`,
-      [name, experience, introduction, place, sitter_id, trade_name, status]
+      `insert into pet_sitter_profiles (name, experience, introduction, place, user_id, trade_name, status, services)
+    values ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        name,
+        experience,
+        introduction,
+        place,
+        sitter_id,
+        trade_name,
+        status,
+        services,
+      ]
     );
 
     for (let i = 0; i < pet_type.length; i++) {
       await connectionPool.query(
-        `insert into pet_types (type, service, pet_sitter_profile_id)
-      values ($1, $2, (select id from pet_sitter_profiles where user_id = $3))`,
-        [pet_type[i], service[i], sitter_id]
+        `insert into pet_types (type, pet_sitter_profile_id)
+      values ($1, (select id from pet_sitter_profiles where user_id = $2))`,
+        [pet_type[i], sitter_id]
       );
     }
 
