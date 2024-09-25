@@ -80,11 +80,51 @@ export async function PUT(req) {
   const province = formData.get("province");
   const postcode = formData.get("postcode");
   const date = new Date();
-  const profilePic = formData.get("profilePic");
-  const sideImages = formData.getAll("sideImages");
+  const profilePic = formData.get("profile_image");
+  const sideImages = formData.getAll("galleries");
   const publicUrls = [];
-  // console.log("Prof -*--*---*-*-", sideImages);
+  // console.log("sideImages -*--*---*-*-", sideImages);
+  // console.log("profilePic -*--*---*-*-", profilePic);
   try {
+    // console.log("Prof -*--*---*-*-", sideImages);
+
+    // Check if profilePic exists and its type is an image
+    if (profilePic.size > 0 && !profilePic.type.startsWith("image/")) {
+      console.log("Profile picture is not an image. Returning 404.");
+      return NextResponse.json(
+        {
+          message: " 404 Not found result",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Check if sideImages exists and has valid images
+    // console.log("side-*--", sideImages);
+    // console.log("side length-*--", sideImages.length);
+    if (sideImages.length > 0) {
+      for (let i = 0; i < sideImages.length; i++) {
+        // console.log("sideImages i-*--", sideImages[i].size);
+        // if ((sideImages[i].size = 0)) {
+        const file = sideImages[i];
+        // condi !== 0 for check null value
+        if (!file.type.startsWith("image/") && file.size !== 0) {
+          console.log(
+            `File at index ${i} in sideImages is not an image. Returning 404.`
+          );
+          return NextResponse.json(
+            {
+              message: " 404 Not found result",
+            },
+            { status: 404 }
+          );
+        }
+        // }
+      }
+    }
+
+    // Proceed with your logic if either profilePic or sideImages are valid or null
+
     await connectionPool.query(
       `update pet_sitter_profiles
       set name = $1, experience = $2, introduction = $3, place = $4, trade_name = $6, updated_at = $7
@@ -180,6 +220,7 @@ export async function PUT(req) {
           .from("attachments")
           .getPublicUrl(filePath); // เอาแต่ละตัวมาpush เข้าpublicUrls
         publicUrls.push(data.publicUrl);
+        // console.log("push url");
       }
       // console.log("publicUrls >>>>>>>", publicUrls);
       await connectionPool.query(
@@ -238,14 +279,48 @@ export async function POST(req) {
   const subdistrict = formData.get("subdistrict");
   const province = formData.get("province");
   const postcode = formData.get("postcode");
-  const profilePic = formData.get("profilePic");
-  const sideImages = formData.getAll("sideImages");
+  const profilePic = formData.get("profile_image");
+  const sideImages = formData.getAll("galleries");
   const publicUrls = [];
   const date = new Date();
   const status = "Waiting for approve";
   // console.log(formData);
-
+  // console.log("Prof -*--*---*-*-", sideImages);
   try {
+    // Check if profilePic exists and its type is an image
+    if (profilePic.size > 0 && !profilePic.type.startsWith("image/")) {
+      console.log("Profile picture is not an image. Returning 404.");
+      return NextResponse.json(
+        {
+          message: " 404 Not found result",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Check if sideImages exists and has valid images
+    // console.log("side-*--", sideImages);
+    // console.log("side length-*--", sideImages.length);
+    if (sideImages.length > 0) {
+      for (let i = 0; i < sideImages.length; i++) {
+        // console.log("sideImages i-*--", sideImages[i].size);
+        // if ((sideImages[i].size = 0)) {
+        const file = sideImages[i];
+        // condi !== 0 for check null value
+        if (!file.type.startsWith("image/") && file.size !== 0) {
+          console.log(
+            `File at index ${i} in sideImages is not an image. Returning 404.`
+          );
+          return NextResponse.json(
+            {
+              message: " 404 Not found result",
+            },
+            { status: 404 }
+          );
+        }
+        // }
+      }
+    }
     await connectionPool.query(
       `insert into pet_sitter_profiles (name, experience, introduction, place, user_id, trade_name, status)
     values ($1, $2, $3, $4, $5, $6, $7)`,
