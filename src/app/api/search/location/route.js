@@ -20,11 +20,12 @@ export async function GET(req) {
     );
     if (result.data.status !== "OK") {
       return NextResponse.json(
+        result.data,
         {
           message: "Could not get location from Google Cloud",
           details: result.data,
-        },
-        { status: 500 }
+        }
+        // { status: 500 }
       );
     }
 
