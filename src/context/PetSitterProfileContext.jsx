@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-
+import axios from "axios";
 const PetSitterProfileContext = createContext();
 
 export const useProfile = () => useContext(PetSitterProfileContext);
@@ -32,11 +32,11 @@ export const PetSitterProfileProvider = ({ children }) => {
     try {
       const response = await axios.get("/api/pet-sitter/profile");
       const data = response.data;
-
+      // console.log(data);
       setProfileData({
         status: data.status || "",
         profileImage: data.profile_image || "",
-        fullName: data.full_name || "",
+        fullName: data.name || "",
         experience: data.experience || "",
         phone: data.phone || "",
         email: data.email || "",
@@ -57,9 +57,9 @@ export const PetSitterProfileProvider = ({ children }) => {
     }
   };
 
-  //   useEffect(() => {
-  //     fetchProfileData();
-  //   }, []);
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
 
   const validateProfileData = () => {
     const errors = [];
@@ -83,10 +83,6 @@ export const PetSitterProfileProvider = ({ children }) => {
 
   const createProfileData = async (profileData) => {
     const errors = validateProfileData();
-    if (errors.length > 0) {
-      setErrorMessages(errors);
-      return;
-    }
 
     try {
       // สร้าง FormData
@@ -94,29 +90,27 @@ export const PetSitterProfileProvider = ({ children }) => {
 
       // เพิ่มข้อมูลลงใน FormData
       formData.append("profile_image", profileData.profileImage); // profileImage ต้องเป็นไฟล์ เช่น Blob หรือ File
-      formData.append("full_name", profileData.fullName);
+      formData.append("name", profileData.fullName);
       formData.append("experience", profileData.experience);
       formData.append("introduction", profileData.introduction);
-      formData.append("trade_name", profileData.tradeName);
+      // formData.append("trade_name", profileData.tradeName);
 
       // เพิ่ม pet_type เป็น array ของ ENUM
-      profileData.petType.forEach((type) =>
-        formData.append("pet_type[]", type)
-      );
+      // profileData.petType.forEach((type) => formData.append("pet_type", type));
 
-      formData.append("services", profileData.services);
-      formData.append("place", profileData.place);
+      // formData.append("services", profileData.services);
+      // formData.append("place", profileData.place);
 
       // เพิ่ม gallery ไม่เกิน 10 รูป
-      profileData.gallery.slice(0, 10).forEach((image) => {
-        formData.append("galleries[]", image); // แต่ละรายการใน gallery ควรเป็นไฟล์ (Blob หรือ File)
-      });
+      // profileData.gallery.slice(0, 10).forEach((image) => {
+      //   formData.append("galleries", image); // แต่ละรายการใน gallery ควรเป็นไฟล์ (Blob หรือ File)
+      // });
 
-      formData.append("address_detail", profileData.addressDetail);
-      formData.append("district", profileData.district);
-      formData.append("sub_district", profileData.subDistrict);
-      formData.append("province", profileData.province);
-      formData.append("post_code", profileData.postCode);
+      // formData.append("address_detail", profileData.addressDetail);
+      // formData.append("district", profileData.district);
+      // formData.append("sub_district", profileData.subDistrict);
+      // formData.append("province", profileData.province);
+      // formData.append("post_code", profileData.postCode);
 
       // เพิ่ม created_at และ updated_at
       formData.append("created_at", new Date().toISOString());
@@ -138,11 +132,7 @@ export const PetSitterProfileProvider = ({ children }) => {
   };
 
   const updateProfileData = async (profileData) => {
-    const errors = validateProfileData();
-    if (errors.length > 0) {
-      setErrorMessages(errors);
-      return;
-    }
+    console.log(profileData.fullName);
 
     try {
       // สร้าง FormData สำหรับอัพเดตข้อมูล
@@ -154,23 +144,21 @@ export const PetSitterProfileProvider = ({ children }) => {
       }
 
       // เพิ่มข้อมูลลงใน FormData
-      formData.append("full_name", profileData.fullName);
+      formData.append("name", profileData.fullName);
       formData.append("experience", profileData.experience);
       formData.append("introduction", profileData.introduction);
       formData.append("trade_name", profileData.tradeName);
 
       // เพิ่ม pet_type เป็น array ของ ENUM
-      profileData.petType.forEach((type) =>
-        formData.append("pet_type[]", type)
-      );
+      // profileData.petType.forEach((type) => formData.append("pet_type", type));
 
-      formData.append("services", profileData.services);
-      formData.append("place", profileData.place);
+      // formData.append("services", profileData.services);
+      // formData.append("place", profileData.place);
 
-      // เพิ่ม gallery ไม่เกิน 10 รูป
-      profileData.gallery.slice(0, 10).forEach((image) => {
-        formData.append("galleries[]", image); // แต่ละรายการใน gallery ควรเป็นไฟล์ (Blob หรือ File)
-      });
+      // // เพิ่ม gallery ไม่เกิน 10 รูป
+      // profileData.gallery.slice(0, 10).forEach((image) => {
+      //   formData.append("galleries", image); // แต่ละรายการใน gallery ควรเป็นไฟล์ (Blob หรือ File)
+      // });
 
       formData.append("address_detail", profileData.addressDetail);
       formData.append("district", profileData.district);
@@ -178,6 +166,9 @@ export const PetSitterProfileProvider = ({ children }) => {
       formData.append("province", profileData.province);
       formData.append("post_code", profileData.postCode);
 
+      formData.forEach((value, key) => {
+        console.log(key, value);
+      });
       // ส่งคำขอด้วย axios และกำหนด headers ว่าเป็น multipart/form-data
       const response = await axios.put("/api/pet-sitter/profile", formData, {
         headers: {
